@@ -285,3 +285,7 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .header-actions .buy-cell{position:relative;z-index:42}
 .header-actions>button>i:after{background:#000!important}
 .header-actions>button:hover>i:after{background:var(--acid)!important}
+
+/* Active navigation is typographic only — no indicator bar. */
+.topbar nav a:after,.topbar nav a.active:after{content:none!important;display:none!important;background:none!important;box-shadow:none!important}
+.topbar nav a.active{color:#f3f7f4!important;font-weight:500}
