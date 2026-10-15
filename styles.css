@@ -192,3 +192,27 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .home-data-slot:after{right:12px;bottom:12px;border-width:0 1px 1px 0}
 @media(max-width:1050px){.home-data-grid{height:auto;min-height:520px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(260px,1fr))}}
 @media(max-width:680px){.home-data-grid{grid-template-columns:1fr;grid-template-rows:repeat(4,260px)}}
+
+/* Desktop home is a single viewport: compact hero, shorter live bay, four flexible panels. */
+@media(min-width:1051px){
+  body[data-route="live"]{height:100dvh;overflow:hidden!important}
+  .cell-live{height:calc(100dvh - 52px)!important;min-height:0!important;grid-template-rows:minmax(0,60fr) minmax(0,40fr) 28px!important;overflow:hidden!important}
+  .cell-intro,.cell-screen{height:auto!important;min-height:0!important;overflow:hidden!important}
+  .cell-command{height:40px!important;padding:0 32px}
+  .cell-intro-body{padding:0 32px 12px!important}
+  .cell-wordmark{height:94px!important;margin:0!important;font-size:92px!important;line-height:1!important}
+  .cell-intro h1{margin:2px 0 7px!important;font-size:14px!important;line-height:1.38!important}
+  .cell-intro-body>p{margin:0 0 7px!important;font-size:8.5px!important;line-height:1.55!important}
+  .cell-inline-stats{height:25px!important;margin:0 0 7px!important}
+  .cell-ca{height:36px!important}
+  .cell-proof-banner{min-height:76px!important;margin-top:7px!important;padding:8px!important}
+  .cell-action-zone{min-height:63px!important;margin-top:7px!important}
+  .cell-action-zone .cell-actions a{min-height:37px!important;padding-top:8px!important;padding-bottom:8px!important}
+  .cell-action-zone .cell-manual-link{margin-top:7px!important}
+  .home-data-grid{height:auto!important;min-height:0!important}
+}
+
+/* Transparent header mark: the canvas is removed, so size the component itself. */
+.brand-logo img{object-fit:contain!important}
+@media(min-width:1051px){.brand-logo img{width:44px!important;height:44px!important}}
+@media(max-width:1050px){.brand-logo img{width:42px!important;height:42px!important}}
