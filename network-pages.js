@@ -30,6 +30,28 @@
     const view = one(".lineage-workstation");
     if (!view) return;
     const lineage = data.online ? data.state?.lineage || [] : [];
+    const official = data.online ? data.state?.officialAgents || [] : [];
+    const online = official.filter((agent) => agent.status === "online" || agent.status === "busy");
+    text("[data-circuit-online]", `${online.length} / ${official.length || 8}`, view);
+    text("[data-circuit-accepted]", String(lineage.length), view);
+    text("[data-circuit-quorum]", lineage.length ? "2 / 2" : "0 / 2", view);
+    text("[data-circuit-registered]", `${official.length || 8} profiles`, view);
+    text("[data-circuit-core-online]", `${online.length} workers`, view);
+    text("[data-circuit-generation]", String(lineage.length), view);
+    text("[data-circuit-core-state]", data.online ? (lineage.length ? `Generation ${lineage.length} accepted` : "Connected / no accepted signal") : "Core unavailable", view);
+    text("[data-circuit-sync]", data.online ? `Core synchronized · ${when(data.telemetry?.at)}` : "Core unavailable", view);
+    official.forEach((agent) => {
+      const node = one(`[data-circuit-agent="${agent.id}"]`, view);
+      if (!node) return;
+      const active = agent.status === "online" || agent.status === "busy";
+      node.classList.toggle("is-online", active);
+      const code = one("code", node), label = one("small", node), bar = one("u em", node);
+      if (code) code.textContent = String(agent.status || "ready").toUpperCase();
+      if (label) label.textContent = active ? "HEARTBEAT" : "PROFILE";
+      if (bar) bar.style.setProperty("--scan", active && Number.isFinite(Number(agent.telemetry?.cpuPct)) ? `${Math.max(8, Math.min(100, Number(agent.telemetry.cpuPct)))}%` : "12%");
+    });
+    const registry = one("[data-circuit-registry]", view);
+    if (registry && official.length) registry.innerHTML = official.map((agent, index) => `<a href="#live"><i>${String(index + 1).padStart(2, "0")}</i><span><b>${escapeHtml(agent.role)}</b><small>${escapeHtml(agent.component)} · ${escapeHtml(agent.status === "online" || agent.status === "busy" ? agent.activity || "worker connected" : "role profile published")}</small></span><code>${escapeHtml(String(agent.status || "ready").toUpperCase())}</code><em>${agent.status === "online" || agent.status === "busy" ? "LIVE" : "READY"}</em></a>`).join("");
     text(".lineage-canvas .subhead b", data.online ? `${lineage.length} proofs · epoch ${lineage.length}` : "Core unavailable", view);
     const empty = one(".lineage-empty", view);
     const ledgerEmpty = one(".lineage-ledger .ledger-empty", view);

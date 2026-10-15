@@ -6,7 +6,7 @@
 
   function inlineMarkdown(value) {
     return escapeHtml(value)
-      .replace(/!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g, '<img class="readme-badge" src="$2" alt="$1" loading="lazy">')
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g, '<span class="readme-badge-text">$1</span>')
       .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<span class="readme-link" title="$2">$1</span>')
       .replace(/`([^`]+)`/g, "<code>$1</code>")
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
@@ -60,6 +60,14 @@
       const response = await fetch("./source-index.json?v=1", { cache: "no-store" });
       if (!response.ok) throw new Error(`Source index returned HTTP ${response.status}`);
       const manifest = await response.json(), files = manifest.files || [], byPath = new Map(files.map((file) => [file.path, file]));
+      const textFiles = files.filter((file) => file.content !== null);
+      const sourceLineCount = textFiles.reduce((sum, file) => sum + file.content.split(/\r?\n/).length, 0);
+      const textBytes = textFiles.reduce((sum, file) => sum + file.size, 0);
+      set("[data-source-release]", String(manifest.revision || "unknown").slice(0, 12));
+      set("[data-source-files]", String(files.length));
+      set("[data-source-lines]", sourceLineCount.toLocaleString());
+      set("[data-source-bytes]", formatBytes(textBytes));
+      set("[data-source-generated]", manifest.generatedAt ? new Date(manifest.generatedAt).toLocaleString([], { hour12: false }) : "—");
       set("[data-repo-description]", manifest.description);
       set("[data-repo-branch]", "main");
       set("[data-repo-revision]", String(manifest.revision || "unknown").slice(0, 7));
