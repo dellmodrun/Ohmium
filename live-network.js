@@ -72,11 +72,9 @@
       <header><span>${agent.official ? `GENESIS / ${escapeHtml(agent.slot || String(index + 1).padStart(2, "0"))}` : "OWNER DEPLOYED"}</span><b>${escapeHtml(status.toUpperCase())}</b></header>
       <div class="live-agent-scope">
         <div class="live-agent-model" aria-hidden="true">${modelFor(agent)}</div>
-        <div class="live-runtime-register"><span><b>CPU</b><em>${escapeHtml(cpu)}</em></span><span><b>RSS</b><em>${escapeHtml(rss)}</em></span><span><b>UPTIME</b><em>${escapeHtml(uptime)}</em></span></div>
-        <div class="live-runtime-chart"><header><span>PROCESS CPU / ${samples.length} SAMPLES</span><b>${escapeHtml(active ? "CAPTURING" : "NO SIGNAL")}</b></header><svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26H100M0 16H100M0 6H100"/><polyline points="${wave(samples)}"/></svg></div>
         <span class="live-lock-label">${escapeHtml(active ? "HEARTBEAT LOCKED" : "SIGNAL OPEN")}</span>
       </div>
-      <section><small>${escapeHtml(agent.component || "Component")}</small><strong>${escapeHtml(agent.role || agent.name)}</strong><p>${escapeHtml(agent.activity || agent.responsibility || "Awaiting worker activity")}</p></section>
+      <section><small>${escapeHtml(agent.component || "Component")}</small><strong>${escapeHtml(agent.role || agent.name)}</strong><p>${escapeHtml(agent.activity || agent.responsibility || "Awaiting worker activity")}</p><div class="live-telemetry-inline"><span>CPU <b>${escapeHtml(cpu)}</b></span><span>RSS <b>${escapeHtml(rss)}</b></span><span>UP <b>${escapeHtml(uptime)}</b></span><svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-label="${samples.length} real process samples"><polyline points="${wave(samples)}"/></svg></div></section>
       <footer><span>${escapeHtml(owner)}</span><time datetime="${escapeHtml(agent.lastSeenAt || "")}" title="${escapeHtml(agent.lastSeenAt || "No heartbeat received")}">${escapeHtml(age(agent.lastSeenAt))}</time><em>${escapeHtml(load)}</em></footer>
     </button>`;
   }
