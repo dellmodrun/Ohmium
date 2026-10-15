@@ -305,7 +305,7 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 
 /* One social group, one centered divider. */
 .social-cluster{position:relative!important;display:grid!important;width:96px!important;grid-template-columns:1fr 1fr!important;border-left:1px solid #223027!important;border-right:1px solid #223027!important}
-.social-cluster:after{content:"";position:absolute;top:50%;left:50%;width:1px;height:18px;background:#223027;transform:translate(-.5px,-50%);pointer-events:none}
+.social-cluster:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;height:auto;background:#223027;transform:translateX(-.5px);pointer-events:none}
 .header-actions .social-icon{width:auto!important;border:0!important}
 @media(max-width:1260px) and (min-width:1051px){.social-cluster{width:84px!important}}
 
@@ -319,3 +319,9 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .topbar{border-bottom:0!important}
 .topbar:after{content:none!important;display:none!important;background:none!important}
 .topbar nav,.topbar nav a,.topbar nav a:hover,.topbar nav a:active,.topbar nav a:focus,.topbar nav a.active{border-bottom:0!important}
+
+/* One continuous structural rail, independent from navigation state. */
+.topbar:after{content:""!important;display:block!important;position:absolute!important;right:0!important;bottom:0!important;left:0!important;z-index:100!important;height:1px!important;background:#263a2b!important;box-shadow:none!important;pointer-events:none!important}
+
+.header-actions>button{min-width:124px!important;gap:0!important;padding-inline:18px!important}
+@media(max-width:1260px) and (min-width:1051px){.header-actions>button{min-width:108px!important;padding-inline:12px!important}}
