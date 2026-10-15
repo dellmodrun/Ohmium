@@ -119,7 +119,7 @@
     one("[data-live-foot-time]").textContent = `Last sync ${time(data.telemetry.at)}`;
 
     if (visible.length) grid.innerHTML = visible.map(card).join("");
-    else grid.innerHTML = '<div class="live-loading live-community-empty"><i></i><b>No owner-deployed Agents yet</b><span>This surface will populate from the Core registry after token burn activation is live and the first owner Agent is created.</span><a href="#spawn" data-route="spawn">View deployment protocol</a></div>';
+    else grid.innerHTML = '<div class="live-loading live-community-empty"><i></i><b>No owner-deployed Agents yet</b><span>This surface will populate from the Core registry after token burn activation is live and the first owner Agent is created.</span><a href="#deploy" data-route="deploy">View deployment protocol</a></div>';
 
     const events = data.state.events || [];
     one("[data-live-event-count]").textContent = String(events.length);

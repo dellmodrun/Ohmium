@@ -584,3 +584,10 @@ body[data-signal="empty"] .index-cells i{background:transparent!important;opacit
 .live-telemetry-inline span{display:flex;gap:4px}.live-telemetry-inline b{color:#abb7af;font-weight:500}.is-online .live-telemetry-inline span:first-child b{color:var(--acid)}
 .live-telemetry-inline svg{display:block;width:100%;height:18px}.live-telemetry-inline polyline{fill:none;stroke:var(--acid);stroke-width:1;vector-effect:non-scaling-stroke}
 @media(max-width:560px){.live-agent-card{grid-template-rows:27px 240px 88px 35px}}
+
+/* Owner network empty state must read like a product state, not microcopy. */
+.live-community-empty{padding:40px 24px}
+.live-community-empty i{width:13px;height:13px;margin-bottom:18px}
+.live-community-empty b{font-size:20px;font-weight:500;letter-spacing:-.015em}
+.live-community-empty span{max-width:600px;margin-top:12px;color:#84938a;font-size:12px;line-height:1.65}
+.live-community-empty a{margin-top:22px;padding:12px 18px;font-size:11px;font-weight:500}
