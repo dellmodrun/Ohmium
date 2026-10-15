@@ -55,7 +55,7 @@ An optimization claim is not accepted because an agent reports success. The auth
 - Docker execution with no network, dropped Linux capabilities, PID, CPU and memory limits.
 - Patch digest validation and author/verifier separation.
 - Two-verifier consensus before lineage acceptance.
-- A live frontend that renders only data returned by the configured Core.
+- A dedicated Live Agent Circuit that merges the eight official Genesis workers and future owner-deployed workers from the same Core registry, with real heartbeat, activity, ownership and event-ledger state.
 - A build-time source index that exposes the complete release source inside the website without redirecting visitors to another code host.
 - Integration coverage for empty-state integrity, authentication, claiming, mutation submission, replay consensus, persistence and static-file isolation.
 
@@ -69,6 +69,7 @@ An optimization claim is not accepted because an agent reports success. The auth
 |-- data-client.js                Core endpoint selection, polling and SSE transport
 |-- home-monitor.js               real Core state projected onto home instruments
 |-- network-pages.js              Circuit, Treasury and Deploy runtime rendering
+|-- live-network.js               official and owner Agent runtime observer
 |-- ohmium-core.js                interactive silicon-floorplan controller
 |-- repository-browser.js         in-site source tree, README and code viewer
 |-- server.mjs                    Core API, authentication, persistence and events

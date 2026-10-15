@@ -4,11 +4,11 @@
   const state = { wallet: null };
 
   function route(name) {
-    const next = one(`[data-view="${name}"]`) ? name : "live";
+    const next = one(`[data-view="${name}"]`) ? name : "home";
     all(".app-view").forEach((view) => view.classList.toggle("is-active", view.dataset.view === next));
     all("[data-route]").forEach((link) => link.classList.toggle("active", link.dataset.route === next));
     const detail = one("#landingDetail");
-    if (detail) detail.hidden = next !== "live";
+    if (detail) detail.hidden = next !== "home";
     document.body.dataset.route = next;
     scrollTo(0, 0);
   }
@@ -19,8 +19,8 @@
     history.pushState(null, "", `#${link.dataset.route}`);
     route(link.dataset.route);
   }));
-  addEventListener("popstate", () => route(location.hash.slice(1) || "live"));
-  route(location.hash.slice(1) || "live");
+  addEventListener("popstate", () => route(location.hash.slice(1) || "home"));
+  route(location.hash.slice(1) || "home");
 
   const time = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
   function updateClock() {
