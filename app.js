@@ -1,26 +1,115 @@
-(function(){
-  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-  const state={route:'live',task:'allocator',connected:false};
-  const tasks={allocator:{id:'M-7F3A',path:'runtime/allocator.rs',machine:'helix-17'},merkle:{id:'M-82C1',path:'kernels/merkle.cu',machine:'cobalt-03'},parser:{id:'M-91D0',path:'codec/parser.zig',machine:'kiln-22'},vm:{id:'M-A033',path:'vm/vm_exec.rs',machine:'vector-08'},codec:{id:'M-B812',path:'transport/codec.ts',machine:'oxide-11'}};
-  const snippets={
-    diff:'<ol><li><code>pub fn reserve(&amp;mut self, requested: usize) {</code></li><li class="minus"><code>let next = self.cursor + requested;</code></li><li class="minus"><code>if next &gt; self.capacity {</code></li><li class="minus"><code>self.grow(next);</code></li><li class="minus"><code>}</code></li><li class="plus"><code>let aligned = requested.next_multiple_of(64);</code></li><li class="plus"><code>let next = self.cursor.saturating_add(aligned);</code></li><li class="plus"><code>if unlikely(next &gt; self.capacity) {</code></li><li class="plus"><code>self.grow(next.next_power_of_two());</code></li><li class="plus"><code>}</code></li><li><code>self.cursor = next;</code></li><li><code>}</code></li></ol><span class="compile-scan"></span>',
-    source:'<ol><li><code>#[inline(always)]</code></li><li><code>pub fn reserve(&amp;mut self, requested: usize) {</code></li><li><code>let aligned = requested.next_multiple_of(64);</code></li><li><code>let next = self.cursor.saturating_add(aligned);</code></li><li><code>if unlikely(next &gt; self.capacity) {</code></li><li><code>self.grow(next.next_power_of_two());</code></li><li><code>}</code></li><li><code>self.cursor = next;</code></li><li><code>}</code></li></ol>',
-    assembly:'<ol><li><code>push   %rbp</code></li><li><code>mov    %rsp,%rbp</code></li><li><code>add    $0x3f,%rsi</code></li><li><code>and    $0xffffffffffffffc0,%rsi</code></li><li><code>add    0x18(%rdi),%rsi</code></li><li><code>jb     0x0000000000413f20</code></li><li><code>cmp    0x20(%rdi),%rsi</code></li><li><code>ja     0x0000000000413f20</code></li><li><code>mov    %rsi,0x18(%rdi)</code></li><li><code>pop    %rbp</code></li><li><code>ret</code></li></ol>'
-  };
-  function route(next){if(!document.querySelector('[data-view="'+next+'"]'))next='live';state.route=next;$$('.app-view').forEach(v=>v.classList.toggle('is-active',v.dataset.view===next));$$('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===next));const detail=$('#landingDetail');if(detail)detail.hidden=next!=='live';document.body.dataset.route=next;scrollTo(0,0)}
-  function fromHash(){route(location.hash.slice(1)||'live')}
-  $$('[data-route]').forEach(a=>a.addEventListener('click',e=>{const r=a.dataset.route;if(!r)return;e.preventDefault();history.pushState(null,'','#'+r);route(r)}));addEventListener('popstate',fromHash);fromHash();
-  const nums=$$('[data-count]'),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;nums.forEach(el=>{const end=Number(el.dataset.count),suffix=el.dataset.suffix||'',dec=String(end).includes('.');if(reduce){el.textContent=(dec?end.toFixed(1):end.toLocaleString())+suffix;return}let start=performance.now();function tick(now){let p=Math.min(1,(now-start)/1200),v=end*(1-Math.pow(1-p,3));el.textContent=(dec?v.toFixed(1):Math.round(v).toLocaleString())+suffix;if(p<1)requestAnimationFrame(tick)}requestAnimationFrame(tick)});
-  const etClock=()=>new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date());function clock(){const el=$('#clock');if(el)el.textContent=etClock()+' ET'}clock();setInterval(clock,1000);
-  function copied(btn,value){navigator.clipboard?.writeText(value);const old=btn.textContent;btn.textContent='copied';setTimeout(()=>btn.textContent=old,1200)}$$('[data-copy]').forEach(btn=>btn.addEventListener('click',()=>copied(btn,btn.dataset.copy)));
-  $$('.pane-title button').forEach(b=>b.addEventListener('click',()=>{b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')}));
-  $$('.queue-item').forEach(item=>item.addEventListener('click',()=>{state.task=item.dataset.task;$$('.queue-item').forEach(x=>x.classList.remove('selected'));item.classList.add('selected');const t=tasks[state.task];$('#editorPath').textContent=t.path;$('#editorMutation').textContent=t.id;$('.editor-meta span:nth-child(3) b').textContent=t.machine;$('#fullCode').animate([{opacity:.25},{opacity:1}],{duration:260});}));
-  $$('[data-editor-tab]').forEach(btn=>btn.addEventListener('click',()=>{$$('[data-editor-tab]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$('#fullCode').innerHTML=snippets[btn.dataset.editorTab];}));
-  // Pump.fun actions remain on the homepage until the $OHMIUM CA is published.
-  // X uses its real external href; do not intercept navigation.
+(() => {
+  const one = (selector, root = document) => root.querySelector(selector);
+  const all = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const state = { wallet: null };
 
-  const modal=$('#walletModal');function modalOpen(){modal.classList.add('open');modal.setAttribute('aria-hidden','false')}function modalClose(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true')}$('.header-actions button')?.addEventListener('click',modalOpen);$('.modal-close')?.addEventListener('click',modalClose);modal?.addEventListener('click',e=>{if(e.target===modal)modalClose()});addEventListener('keydown',e=>{if(e.key==='Escape')modalClose()});$$('.wallet-choice').forEach(btn=>btn.addEventListener('click',()=>{state.connected=true;$('.header-actions button').textContent='8Kr…p21';$$('.wallet-choice b').forEach(b=>b.textContent='available');$('b',btn).textContent='connected ✓';setTimeout(modalClose,500)}));
-  const cpu=$('#cpuRange'),mem=$('#memRange'),name=$('#machineName'),target=$('#machineTarget');function preview(){if(cpu){$('#cpuOut').textContent=cpu.value;$('#previewCpu').textContent=cpu.value+' vCPU'}if(mem){$('#memOut').textContent=mem.value+' GB';$('#previewMem').textContent=mem.value+' GB'}if(name)$('#previewName').textContent=name.value||'unnamed-component';if(target)$('#previewClass').textContent=target.value.split('/').map(x=>x.trim().toUpperCase()).join(' / ')};[cpu,mem,name,target].filter(Boolean).forEach(x=>x.addEventListener('input',preview));preview();
-  $('#spawnForm')?.addEventListener('submit',e=>{e.preventDefault();const btn=$('.spawn-submit');if(!$('#attest').checked){btn.textContent='confirm component attestation first';btn.classList.add('warning');setTimeout(()=>{btn.textContent='prepare component kit';btn.classList.remove('warning')},1800);return}if(!state.connected){modalOpen();return}btn.textContent='component configuration prepared ✓'});
-  $$('.treasury-ledger .subhead button').forEach(btn=>btn.addEventListener('click',()=>{$$('.treasury-ledger .subhead button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const f=btn.textContent.trim();$$('.treasury-ledger .ledger-row:not(.head)').forEach(row=>{const kind=$('.kind',row)?.textContent.trim()||'';row.style.display=f==='all'||kind.includes(f)?'grid':'none'})}));
+  function route(name) {
+    const next = one(`[data-view="${name}"]`) ? name : "live";
+    all(".app-view").forEach((view) => view.classList.toggle("is-active", view.dataset.view === next));
+    all("[data-route]").forEach((link) => link.classList.toggle("active", link.dataset.route === next));
+    const detail = one("#landingDetail");
+    if (detail) detail.hidden = next !== "live";
+    document.body.dataset.route = next;
+    scrollTo(0, 0);
+  }
+
+  all("[data-route]").forEach((link) => link.addEventListener("click", (event) => {
+    if (!link.dataset.route) return;
+    event.preventDefault();
+    history.pushState(null, "", `#${link.dataset.route}`);
+    route(link.dataset.route);
+  }));
+  addEventListener("popstate", () => route(location.hash.slice(1) || "live"));
+  route(location.hash.slice(1) || "live");
+
+  const time = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+  function updateClock() {
+    const clock = one("#clock");
+    if (clock) clock.textContent = `${time.format(new Date())} ET`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  all("[data-copy]").forEach((button) => button.addEventListener("click", async () => {
+    if (!button.dataset.copy || button.dataset.copy.toUpperCase() === "TBA") return;
+    const original = button.textContent;
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy);
+      button.textContent = "Copied";
+    } catch {
+      button.textContent = "Copy unavailable";
+    }
+    setTimeout(() => { button.textContent = original; }, 1200);
+  }));
+
+  const modal = one("#walletModal");
+  const connectButton = one(".header-actions > button");
+  function openModal() { modal?.classList.add("open"); modal?.setAttribute("aria-hidden", "false"); }
+  function closeModal() { modal?.classList.remove("open"); modal?.setAttribute("aria-hidden", "true"); }
+  connectButton?.addEventListener("click", openModal);
+  one(".modal-close")?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
+  addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+
+  function providerFor(name) {
+    if (name === "phantom") return window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
+    if (name === "solflare") return window.solflare || null;
+    if (name === "backpack") return window.backpack?.solana || null;
+    return null;
+  }
+
+  all(".wallet-choice").forEach((choice) => choice.addEventListener("click", async () => {
+    const status = one("b", choice);
+    const provider = providerFor(choice.dataset.wallet);
+    if (!provider) { status.textContent = "Not installed"; return; }
+    status.textContent = "Connecting…";
+    try {
+      const result = await provider.connect();
+      const publicKey = String(result?.publicKey || provider.publicKey || "");
+      if (!publicKey) throw new Error("Wallet returned no public key");
+      state.wallet = publicKey;
+      window.OhmiumWallet = { publicKey, provider: choice.dataset.wallet };
+      one("span", connectButton).textContent = `${publicKey.slice(0, 4)}…${publicKey.slice(-4)}`;
+      status.textContent = "Connected";
+      document.dispatchEvent(new CustomEvent("ohmium:wallet", { detail: window.OhmiumWallet }));
+      setTimeout(closeModal, 350);
+    } catch { status.textContent = "Connection rejected"; }
+  }));
+
+  const cpu = one("#cpuRange"), memory = one("#memRange"), name = one("#machineName"), target = one("#machineTarget");
+  function updatePreview() {
+    if (cpu) { one("#cpuOut").textContent = cpu.value; one("#previewCpu").textContent = `${cpu.value} vCPU`; }
+    if (memory) { one("#memOut").textContent = `${memory.value} GB`; one("#previewMem").textContent = `${memory.value} GB`; }
+    if (name) one("#previewName").textContent = name.value || "unnamed-component";
+    if (target) one("#previewClass").textContent = target.value.toUpperCase();
+  }
+  [cpu, memory, name, target].filter(Boolean).forEach((control) => control.addEventListener("input", updatePreview));
+  updatePreview();
+
+  one("#spawnForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = one(".spawn-submit");
+    if (!one("#attest")?.checked) { button.textContent = "Confirm the maintenance attestation"; return; }
+    if (!state.wallet) { openModal(); return; }
+    if (!window.OhmiumData?.online) { button.textContent = "Core unavailable — deployment not submitted"; return; }
+    button.disabled = true;
+    button.textContent = "Registering…";
+    try {
+      const repository = [...event.currentTarget.querySelectorAll("input")].find((input) => input.value.startsWith("https://"))?.value || "";
+      const result = await window.OhmiumData.request("/api/machines/register", { method: "POST", body: JSON.stringify({ name: name.value, target: target.value, repository, cpu: Number(cpu.value), memoryGb: Number(memory.value), wallet: state.wallet, registrationKey: one("#registrationKey")?.value || "" }) });
+      const output = document.createElement("div");
+      output.className = "spawn-result";
+      const heading = document.createElement("b"), note = document.createElement("span"), secret = document.createElement("code");
+      heading.textContent = "Component registered";
+      note.textContent = "Save the one-time worker secret now.";
+      secret.textContent = result.secret;
+      output.append(heading, note, secret);
+      event.currentTarget.append(output);
+      button.textContent = "Registered";
+      window.OhmiumData.refresh();
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = error.message || "Registration failed";
+    }
+  });
 })();

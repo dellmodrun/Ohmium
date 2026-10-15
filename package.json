@@ -7,9 +7,8 @@
                     "build:figure": "node tools/build-ohmium-silicon.mjs",
                     "start":  "node server.mjs",
                     "worker":  "node worker.mjs",
-                    "check":  "node --check server.mjs \u0026\u0026 node --check worker.mjs \u0026\u0026 node --check fleet.mjs \u0026\u0026 node --check app.js \u0026\u0026 node --check runtime.js && node --check github-live.js && node --check product-pages.js",
-                    "test":  "node test.mjs",
-                    "fleet":  "node fleet.mjs"
+                    "check":  "node --check server.mjs && node --check worker.mjs && node --check data-client.js && node --check app.js && node --check home-monitor.js && node --check network-pages.js && node --check ohmium-core.js",
+                    "test":  "node test.mjs"
                 },
     "engines":  {
                     "node":  "\u003e=20"
