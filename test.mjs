@@ -11,9 +11,10 @@ async function call(path, method = "GET", value, secret) { const response = awai
 
 try {
   await wait();
-  const initial = await call("/api/state"), sources = await call("/api/sources"), catalog = await call("/api/agents");
+  const initial = await call("/api/state"), sources = await call("/api/sources"), catalog = await call("/api/agents"), economics = await call("/api/economics");
   if (initial.tasks.length || initial.machines.length || initial.mutations.length || initial.lineage.length || initial.events.length || sources.sources.length) throw new Error("new Core must start without synthetic data");
   if (catalog.agents.length !== 8 || initial.officialAgents.length !== 8 || catalog.agents.some((agent) => !agent.official || agent.status !== "ready" || agent.machineId)) throw new Error("official agent catalog must expose eight honest ready profiles");
+  if (economics.agentActivation.burnTokens !== 10000 || economics.creatorRewards.allocation.agentIncentivesPct !== 40 || Object.values(economics.creatorRewards.allocation).reduce((sum, value) => sum + value, 0) !== 100) throw new Error("economic policy must expose the configured burn and a complete allocation");
   const task = (await call("/api/tasks", "POST", { title: "Allocator hot path", repository: "https://github.com/example/runtime", baseCommit: "0123456789abcdef", target: "src/hot.rs", dockerImage: "rust:1.82-alpine", testCommand: ["cargo", "test", "--locked"], benchmarkCommand: ["./bench-json"], metric: "p95_ms", lowerIsBetter: true, minGainPct: 2 })).task;
   const workers = [];
   for (const name of ["author-01", "verifier-01", "verifier-02"]) workers.push(await call("/api/machines/register", "POST", { name, target: "rust", cpu: 4, memoryGb: 8 }));
@@ -31,7 +32,7 @@ try {
   if (state.tasks[0].status !== "complete" || state.machines.length !== 3 || state.lineage.length !== 1) throw new Error("state lifecycle mismatch");
   if (state.machines[0].samples?.length !== 1 || state.machines[0].telemetry?.rssMb !== 48.25) throw new Error("worker runtime telemetry was not persisted");
   if ((await fetch(`${base}/data/state.json`)).status !== 404) throw new Error("private state is publicly readable");
-  console.log("PASS: official agent catalog, runtime telemetry, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
+  console.log("PASS: economic policy, official agent catalog, runtime telemetry, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
 } finally {
   child.kill();
   await new Promise((resolve) => child.once("exit", resolve));

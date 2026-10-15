@@ -93,6 +93,21 @@
   }
   [cpu, memory, name, target].filter(Boolean).forEach((control) => control.addEventListener("input", updatePreview));
   updatePreview();
+  const deployDescription = one(".spawn-intro p");
+  if (deployDescription) deployDescription.textContent = "Owner activation permanently burns 10,000 $OHMIUM per Agent. The amount is defined; the on-chain burn step remains disabled until the verified mint and burn program are published.";
+  const activationValue = one(".deploy-rack-readout dl div:last-child dd");
+  if (activationValue) activationValue.textContent = "10,000 $OHMIUM";
+
+  const economicTabs = all(".economic-ledger > .subhead button");
+  economicTabs.forEach((button) => button.addEventListener("click", () => {
+    const mode = button.textContent.trim().toLowerCase();
+    economicTabs.forEach((item) => item.classList.toggle("active", item === button));
+    all(".economic-ledger .reward-formula, .economic-ledger .eligibility-console").forEach((panel) => { panel.hidden = mode !== "policy"; });
+    const heading = one(".chain-ledger header span"), stateLabel = one(".chain-ledger header b"), empty = one(".chain-ledger .ledger-empty");
+    if (heading) heading.textContent = mode === "receipts" ? "CREATOR REWARD RECEIPTS" : mode === "claims" ? "AGENT REWARD CLAIMS" : "ON-CHAIN ACTIVITY";
+    if (stateLabel) stateLabel.textContent = "NO VERIFIED ENTRIES";
+    if (empty) empty.textContent = mode === "receipts" ? "No verified Pump.fun Creator Rewards receipt has been recorded." : mode === "claims" ? "No verified Agent reward claim has been recorded." : "Mint, treasury address and qualifying transactions are not configured yet.";
+  }));
 
   one("#spawnForm")?.addEventListener("submit", async (event) => {
     event.preventDefault();

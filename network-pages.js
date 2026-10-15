@@ -59,19 +59,20 @@
   function renderTreasury(data) {
     const cards = all(".treasury-grid article");
     const treasury = data.online ? data.state?.treasury : null;
+    const policy = data.online ? data.state?.economics : null;
+    if (policy?.agentActivation) text("[data-policy-burn]", `${Number(policy.agentActivation.burnTokens).toLocaleString()} $${policy.symbol}`);
+    if (policy?.creatorRewards?.allocation) text("[data-policy-incentive]", `${policy.creatorRewards.allocation.agentIncentivesPct}%`);
     if (!treasury?.initialized) {
       text(".treasury-workstation .work-command em", data.online ? "Core online · treasury not configured" : "Core unavailable · treasury not configured");
       text(".treasury-summary .subhead b", "Solana · TBA");
       return;
     }
-    const values = [
-      ["treasury address", treasury.address || "—", "reported by Ohmium Core"],
-      ["treasury balance", treasury.balanceSol == null ? "—" : `${treasury.balanceSol} SOL`, `verified ${when(treasury.updatedAt)}`]
-    ];
-    values.forEach(([label, value, note], index) => {
-      if (!cards[index]) return;
-      text("small", label, cards[index]); text("strong", value, cards[index]); text("span", note, cards[index]);
-    });
+    const treasuryCard = cards[3];
+    if (treasuryCard) {
+      text("small", "treasury address", treasuryCard);
+      text("strong", treasury.address || "—", treasuryCard);
+      text("span", treasury.balanceSol == null ? `configured · verified ${when(treasury.updatedAt)}` : `${treasury.balanceSol} SOL · verified ${when(treasury.updatedAt)}`, treasuryCard);
+    }
     text(".treasury-workstation .work-command em", `On-chain state · ${when(treasury.updatedAt)}`);
     text(".treasury-summary .subhead b", "Solana · Core verified");
   }

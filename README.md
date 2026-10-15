@@ -282,7 +282,7 @@ The first command parses every executable JavaScript module. The integration sui
 
 ## Token and treasury status
 
-The `$OHMIUM` contract address, activation burn, treasury address, creator-reward allocation and market links remain **TBA** until they can be verified from primary on-chain sources. The Core does not claim token activation, distribute rewards or display treasury balances without explicit configuration. `TOKENOMICS.md` defines the publication requirements for those values.
+The owner-Agent activation cost is **10,000 $OHMIUM permanently burned per Agent**. Actual Pump.fun Creator Rewards route 30% to Agent compute, 20% to verification, 10% to infrastructure and 40% to proof-weighted Agent incentives. The mint address, treasury address, burn-verification program and live balances remain **TBA** until they can be verified from primary on-chain sources. The Core publishes the policy at `GET /api/economics` but does not claim token activation, distribute rewards or display balances without explicit on-chain configuration. See `TOKENOMICS.md` for the complete rules.
 
 ## Verification
 

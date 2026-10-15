@@ -13,6 +13,21 @@ const registrationKey = process.env.OHMIUM_REGISTRATION_KEY || "";
 const allowedOrigin = process.env.OHMIUM_ALLOWED_ORIGIN || "";
 const clients = new Set(), rate = new Map(), metrics = { startedAt: Date.now(), requests: 0 };
 const officialCatalog = JSON.parse(readFileSync(resolve(root, "official-agents.json"), "utf8"));
+const economicPolicy = Object.freeze({
+  schema: "ohmium.economics.v1",
+  network: "solana",
+  symbol: "OHMIUM",
+  mint: null,
+  treasuryAddress: null,
+  agentActivation: { burnTokens: 10000, permanent: true, enabled: false, proofRequired: true },
+  creatorRewards: {
+    source: "Pump.fun Creator Rewards",
+    basis: "actual receipts only",
+    allocation: { computePct: 30, verificationPct: 20, infrastructurePct: 10, agentIncentivesPct: 40 }
+  },
+  contributionWeights: { acceptedWorkPct: 35, availabilityPct: 25, repairPct: 25, peerVerificationPct: 15 },
+  guarantees: { fixedYield: false, registrationReward: false, duplicateWorkReward: false }
+});
 
 const emptyState = () => ({ version: 4, createdAt: new Date().toISOString(), tasks: [], machines: [], mutations: [], lineage: [], events: [], treasury: { network: "solana", initialized: false, address: null, balanceSol: null, updatedAt: null } });
 mkdirSync(dataDir, { recursive: true });
@@ -36,7 +51,7 @@ function officialAgents() {
     return { ...agent, official: true, status: machine?.status || "ready", machineId: machine?.id || null, lastSeenAt: machine?.lastSeenAt || null, activity: machine?.activity || "Role profile published; no worker connected" };
   });
 }
-function publicState() { return { ...state, machines: state.machines.map(cleanMachine), mutations: state.mutations.map(cleanMutation), officialAgents: officialAgents() }; }
+function publicState() { return { ...state, machines: state.machines.map(cleanMachine), mutations: state.mutations.map(cleanMutation), officialAgents: officialAgents(), economics: economicPolicy }; }
 function emit(type, payload) { const event = { id: id("event"), type, at: now(), payload }; state.events.unshift(event); state.events = state.events.slice(0, 500); persist(); const frame = `event: ${type}\ndata: ${JSON.stringify(event)}\n\n`; for (const client of clients) client.write(frame); }
 function json(response, status, value) { response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }); response.end(JSON.stringify(value)); }
 async function body(request) { const chunks = []; let bytes = 0; for await (const chunk of request) { bytes += chunk.length; if (bytes > 600000) throw new Error("request body exceeds 600KB"); chunks.push(chunk); } return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {}; }
@@ -74,6 +89,7 @@ const server = http.createServer(async (request, response) => {
   try {
     if (!withinLimit(request)) return json(response, 429, { error: "rate limit exceeded" });
     if (request.method === "GET" && path === "/api/health") return json(response, 200, { ok: true, service: "ohmium-core", version: state.version, time: now(), uptimeSec: Math.floor(process.uptime()) });
+    if (request.method === "GET" && path === "/api/economics") return json(response, 200, economicPolicy);
     if (request.method === "GET" && path === "/api/agents") return json(response, 200, { schema: officialCatalog.schema, label: officialCatalog.label, agents: officialAgents() });
     if (request.method === "GET" && (path === "/api/sources" || path === "/api/github-stream")) return json(response, 200, { at: now(), sources: repositories(), channels: [] });
     if (request.method === "GET" && path === "/api/telemetry") { const memory = process.memoryUsage(), machines = state.machines.map(cleanMachine); return json(response, 200, { at: now(), startedAt: new Date(metrics.startedAt).toISOString(), uptimeSec: Math.floor(process.uptime()), pid: process.pid, rssMb: Number((memory.rss / 1048576).toFixed(1)), heapMb: Number((memory.heapUsed / 1048576).toFixed(1)), requests: metrics.requests, sseClients: clients.size, onlineMachines: machines.filter((machine) => machine.status !== "offline").length, totalMachines: machines.length, openTasks: state.tasks.filter((task) => task.status === "open").length, verifying: state.mutations.filter((item) => item.status === "verifying").length, generations: state.lineage.length, events: state.events.length }); }
