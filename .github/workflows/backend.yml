@@ -26,11 +26,11 @@ jobs:
           npm test
       - name: Prepare SSH
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.OHMIUM_SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_B64: ${{ secrets.OHMIUM_SSH_PRIVATE_KEY_B64 }}
           SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
         run: |
           install -d -m 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/ohmium
+          printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/ohmium
           chmod 600 ~/.ssh/ohmium
           ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
       - name: Deploy Core and worker
