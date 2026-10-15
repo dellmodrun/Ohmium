@@ -521,3 +521,9 @@ body[data-signal="empty"] .index-cells i{background:transparent!important;opacit
 @media(max-width:1200px){.live-agent-grid{grid-template-columns:repeat(3,minmax(170px,1fr))}.live-operations-head dl{min-width:380px}.live-operations-body{grid-template-columns:minmax(0,1fr) 260px}}
 @media(max-width:900px){.live-operations{height:auto;min-height:calc(100dvh - 54px);overflow:visible}.live-operations.is-active{grid-template-rows:auto auto 28px}.live-operations-head{grid-template-columns:1fr;padding-bottom:36px}.live-operations-head dl{min-width:0}.live-operations-body{grid-template-columns:1fr}.live-agent-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:260px;border-right:0}.live-observer{min-height:520px;border-top:1px solid #202c23}}
 @media(max-width:560px){.live-operations-head{padding:15px 12px 36px}.live-operations-head dl{grid-template-columns:1fr 1fr}.live-operations-head dl>div:nth-child(2){border-right:0}.live-operations-head dl>div:nth-child(-n+2){border-bottom:1px solid #202c23}.live-filters{right:12px;left:12px}.live-filters button{min-width:0;flex:1}.live-agent-grid{grid-template-columns:1fr;grid-auto-rows:285px}}
+
+/* Each Agent owns an independent live frame. */
+.live-agent-grid{gap:10px;padding:10px;background:#000}
+.live-agent-card{border:1px solid #253229}
+.live-agent-card:hover{border-color:#45604b;background:#020603;box-shadow:none}
+.live-agent-card.is-selected{border-color:var(--acid);background:#020603;box-shadow:0 0 0 1px rgba(127,224,58,.12)}
