@@ -325,3 +325,11 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 
 .header-actions>button{min-width:124px!important;gap:0!important;padding-inline:18px!important}
 @media(max-width:1260px) and (min-width:1051px){.header-actions>button{min-width:108px!important;padding-inline:12px!important}}
+
+/* Full-height section dividers and optically centered social marks. */
+.topbar nav{gap:0!important;padding-left:0!important;border-left:0!important}
+.topbar nav a{border-right:1px solid #223027!important;padding-inline:18px!important}
+.topbar nav a:first-child{border-left:0!important}
+.header-actions .social-icon{display:flex!important;width:100%!important;min-width:0!important;height:60px!important;align-items:center!important;justify-content:center!important;padding:0!important}
+.header-actions .social-icon svg,.header-actions .social-icon img{display:block!important;position:static!important;margin:0!important;transform:none!important}
+@media(max-width:1260px) and (min-width:1051px){.topbar nav a{padding-inline:12px!important}}
