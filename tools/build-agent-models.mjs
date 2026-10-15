@@ -131,7 +131,7 @@ function deploymentRack() {
   const width = 620;
   const height = 500;
   const plate = { x: -86, y: -59, w: 172, d: 118, r: 8 };
-  const P = k.fitProjection([...k.boxCorners(plate, -10, 5), [-76, -49, 128], [76, 49, 128]], width, height, { pad: 34, azimuth: 41, elevation: 29 });
+  const P = k.fitProjection([...k.boxCorners(plate, -10, 5), [-76, -49, 128], [76, 49, 128]], width, height, { pad: 31, azimuth: 48, elevation: 27 });
   const out = [`<path class="iso-halo" d="${k.haloOf(plate, -10, 13, P)}"/>`];
 
   for (const [x, y] of byDepth(k.corners(plate, 15), P)) {
@@ -160,17 +160,37 @@ function deploymentRack() {
   const rails = [-35, 31];
   for (const y of rails) out.push(S(k.slabOf({ x: -57, y, w: 114, d: 3, r: .5 }, 18, 94, P, 3, .3), { tone: "mid" }));
 
-  const trayZ = [20, 34, 48, 62, 76, 90];
+  const trayZ = [18, 29, 40, 51, 62, 73, 84];
   trayZ.forEach((z, row) => {
-    const tray = { x: -53, y: -34 - (row === 2 ? 5 : 0), w: 106, d: row === 2 ? 70 : 65, r: 2.2 };
+    const extended = row === 2;
+    const tray = { x: -53, y: -34 - (extended ? 3 : 0), w: 106, d: extended ? 68 : 65, r: 1.4 };
     const trayParts = [];
-    trayParts.push(S(k.slabOf(tray, z, 8.4, P, 4, .65), { tone: row === 2 ? "hi" : "mid" }));
+    trayParts.push(S(k.slabOf(tray, z, 9.2, P, 4, .65), { tone: extended ? "hi" : "mid" }));
     trayParts.push(L(k.sideSeam(tray, z + 4.2, P, 4), { tone: "faint" }));
     const faceY = tray.y - .2;
-    trayParts.push(S(k.slabOf({ x: -49, y: faceY - 2.3, w: 98, d: 2.4, r: .5 }, z + 1, 6.1, P, 3, .25), { tone: row === 2 ? "hi" : "lo" }));
-    for (let port = 0; port < 8; port += 1) trayParts.push(D([k.iso([-39 + port * 9.2, faceY - 2.5, z + 4.1], P)], { size: port < 2 && row === 2 ? .72 : .46, tone: port < 2 && row === 2 ? "lit" : "mid" }));
+    trayParts.push(S(k.slabOf({ x: -49, y: faceY - 3.1, w: 98, d: 3.2, r: .45 }, z + .8, 7.7, P, 3, .25), { tone: extended ? "hi" : "mid" }));
+    for (let port = 0; port < 12; port += 1) trayParts.push(D([k.iso([-41.5 + port * 7.5, faceY - 3.35, z + 4.4], P)], { size: port < 2 && extended ? .72 : .48, tone: port < 2 && extended ? "lit" : "hi" }));
+    for (let vent = 0; vent < 8; vent += 1) trayParts.push(L(k.sideTicks(-18 + vent * 5.4, -15 + vent * 5.4, 3, 1, faceY - 3.4, z + 6.8, [.9, 1.35], P, "x"), { tone: "lo" }));
     for (const x of [-45, 45]) trayParts.push(L(k.ring(x, faceY - 2.5, 1.45, z + 4.1, P, 14), { tone: "hi" }));
-    out.push(`<g class="${row === 2 ? "deploy-service-tray" : "deploy-rack-tray"}" data-rack-row="${row + 1}">${trayParts.join("")}</g>`);
+    out.push(`<g class="${extended ? "deploy-service-tray" : "deploy-rack-tray"}" data-rack-row="${row + 1}" tabindex="0" role="button" aria-label="Server tray ${row + 1}">${trayParts.join("")}</g>`);
+  });
+
+  const switchZ = 97;
+  const switchPlan = { x: -54, y: -36, w: 108, d: 68, r: 2.4 };
+  out.push(S(k.slabOf(switchPlan, switchZ, 11, P, 4, .6), { tone: "hi" }));
+  out.push(L(k.sideSeam(switchPlan, switchZ + 5.4, P, 4), { tone: "faint" }));
+  const switchFaceY = switchPlan.y - 2.5;
+  out.push(S(k.slabOf({ x: -50, y: switchFaceY, w: 100, d: 2.5, r: .6 }, switchZ + 1.2, 8, P, 3, .25), { tone: "lo" }));
+  for (let port = 0; port < 12; port += 1) out.push(D([k.iso([-41 + port * 7.4, switchFaceY - .2, switchZ + 4.2], P)], { size: port === 10 ? .65 : .42, tone: port === 10 ? "lit" : "mid" }));
+  const display = { x: -45, y: switchFaceY - .3, w: 29, d: 1.2, r: .4 };
+  out.push(S(k.slabOf(display, switchZ + 6.2, 1.8, P, 2, .15), { tone: "mid" }));
+  out.push(k.faceTextSvg(k.sideMatrix([-42, switchFaceY - .5], switchZ + 7.5, P, "left"), "UP 0/7", { size: 3.3, tone: "hi" }));
+
+  const cableEnds = trayZ.map((z, row) => ({ from: k.iso([30 + (row % 2) * 5, -37.2, z + 4.4], P), to: k.iso([25 + row * 2.4, -38.7, switchZ + 3.8], P), row }));
+  cableEnds.forEach(({ from, to, row }) => {
+    const viaA = [from[0] + 12 + row * 1.1, from[1] - 2];
+    const viaB = [to[0] + 9 + row * .7, to[1] + 5];
+    out.push(k.wireSvg(from, to, { via: [viaA, viaB], tone: row === 2 ? "lit" : "mid", flow: row === 2, ends: "both", size: .82 }));
   });
 
   for (const sideX of [-68, 66]) {
@@ -181,9 +201,9 @@ function deploymentRack() {
   const roof = { x: -67, y: -43, w: 134, d: 86, r: 4.5 };
   out.push(S(k.slabOf(roof, 116, 7, P, 5, .8), { tone: "hi" }));
   out.push(L(k.planOutline(k.insetPlan(roof, 4.5), 123.05, P), { tone: "lo" }));
-  for (const x of [-38, 0, 38]) {
-    out.push(S(k.cylinder(x, 1, 11, 123, 2.8, P, 40, .4), { tone: "lo" }));
-    out.push(L(k.ring(x, 1, 7.8, 125.9, P, 30), { tone: "mid" }));
+  for (const x of [-30, 30]) {
+    out.push(S(k.cylinder(x, 1, 14, 123, 2.8, P, 44, .4), { tone: "lo" }));
+    out.push(L(k.ring(x, 1, 10.4, 125.9, P, 36), { tone: "mid" }));
     const spokes = [0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => k.lineOnTop([x + Math.cos(angle) * 2, 1 + Math.sin(angle) * 2], [x + Math.cos(angle) * 7, 1 + Math.sin(angle) * 7], 126, P));
     out.push(L(spokes.join(""), { tone: "lo" }));
   }
@@ -206,6 +226,6 @@ const models = Object.fromEntries(ids.map((id) => {
 const deployRack = deploymentRack();
 
 const theme = `${k.ISO_CSS}\n.ohmium-agent-model,.ohmium-deploy-rack{--anatomy-paper:#010301;--anatomy-face:#071008;--anatomy-top:#08120a;--anatomy-shade-0:#020503;--anatomy-shade-1:#030804;--anatomy-shade-2:#050b06;--anatomy-shade-3:#071008;--anatomy-lit-top:#112417;--anatomy-lit-shade:#0b1a0f;--anatomy-hi:#87a88d;--anatomy-mid:#496651;--anatomy-lo:#263c2c;--anatomy-faint:#17251b;--anatomy-lit:#7fe03a;--anatomy-dot:#7fe03a;--anatomy-halo:#000;--anatomy-halo-opacity:.95}.live-agent-card.is-online [data-part=status-lamp] .iso-top{fill:#7fe03a}.live-agent-card.is-online [data-part=status-lamp]{filter:drop-shadow(0 0 5px rgba(127,224,58,.45))}`;
-const output = `(() => { if (!document.getElementById("ohmium-anatomy-css")) { const style = document.createElement("style"); style.id = "ohmium-anatomy-css"; style.textContent = ${JSON.stringify(theme)}; document.head.append(style); } window.OhmiumAgentModels = Object.freeze(${JSON.stringify(models)}); window.OhmiumDeployRack = ${JSON.stringify(deployRack)}; document.querySelectorAll("[data-deploy-rack]").forEach((node) => { node.innerHTML = window.OhmiumDeployRack; }); })();\n`;
+const output = `(() => { if (!document.getElementById("ohmium-anatomy-css")) { const style = document.createElement("style"); style.id = "ohmium-anatomy-css"; style.textContent = ${JSON.stringify(theme)}; document.head.append(style); } window.OhmiumAgentModels = Object.freeze(${JSON.stringify(models)}); window.OhmiumDeployRack = ${JSON.stringify(deployRack)}; document.querySelectorAll("[data-deploy-rack]").forEach((node) => { node.innerHTML = window.OhmiumDeployRack; node.querySelectorAll("[data-rack-row]").forEach((row) => { const select = () => { node.querySelectorAll("[data-rack-row]").forEach((item) => item.classList.remove("is-selected")); row.classList.add("is-selected"); node.dataset.selectedTray = row.dataset.rackRow; }; row.addEventListener("click", select); row.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); select(); } }); }); }); })();\n`;
 writeFileSync(resolve("agent-models.js"), output);
 console.log(`Agent models: ${ids.length}, ${Buffer.byteLength(output)} bytes`);
