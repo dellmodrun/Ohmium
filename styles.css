@@ -277,3 +277,11 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 @media(min-width:1051px){body[data-route="live"]{height:100dvh}.cell-live{height:calc(100dvh - 60px)!important}}
 @media(max-width:1260px) and (min-width:1051px){.topbar nav{padding-left:6px}.topbar nav a{padding-inline:10px!important}.topbar nav a:after{right:10px;left:10px}.header-actions .ca{min-width:72px!important;padding-inline:11px!important}.header-actions .social-icon{width:42px!important}.header-actions>button{min-width:116px;padding-inline:12px!important}.header-actions .buy-cell{min-width:108px;padding-inline:12px!important}}
 @media(max-width:1050px){.topbar{grid-template-columns:78px minmax(0,1fr)!important}.brand{height:60px!important}.topbar nav{height:60px;padding-left:4px;overflow-x:auto;scrollbar-width:none}.topbar nav a{flex:1 0 88px!important}.header-actions{display:none}}
+
+/* Keep the navigation rail continuous; child surfaces must not mask it. */
+.topbar:after{content:"";position:absolute;right:0;bottom:0;left:0;z-index:40;height:1px;background:#263a2b;pointer-events:none}
+.brand,.topbar nav,.topbar nav a,.header-actions,.header-actions .ca,.social-cluster,.header-actions .social-icon,.header-actions>button{background-color:transparent!important}
+.topbar nav a:after{z-index:41;bottom:0!important}
+.header-actions .buy-cell{position:relative;z-index:42}
+.header-actions>button>i:after{background:#000!important}
+.header-actions>button:hover>i:after{background:var(--acid)!important}
