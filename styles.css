@@ -541,3 +541,31 @@ body[data-signal="empty"] .index-cells i{background:transparent!important;opacit
 .live-runtime-chart{position:absolute;right:10px;bottom:43px;left:10px;height:56px;border:1px solid #223027;background:rgba(0,0,0,.92)}.live-runtime-chart>header{display:flex;height:16px;align-items:center;padding:0 6px;color:#536158;border-bottom:1px solid #1a251e;font-size:4px}.live-runtime-chart>header b{margin-left:auto;color:#66806b;font-size:4px;font-weight:400}.live-runtime-chart svg{display:block;width:100%;height:38px}.live-runtime-chart path{fill:none;stroke:#17231b;stroke-width:.45;vector-effect:non-scaling-stroke}.live-runtime-chart polyline{fill:none;stroke:#7fe03a;stroke-width:1;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 2px rgba(127,224,58,.45))}
 .live-sample-log{position:absolute;right:10px;bottom:7px;left:10px;display:grid;height:30px;grid-template-rows:repeat(3,1fr);overflow:hidden}.live-sample-log p{display:grid;min-width:0;grid-template-columns:38px minmax(0,1fr);align-items:center;margin:0;border-bottom:1px solid #121a15;font-size:4.3px}.live-sample-log time{color:#46534b}.live-sample-log span{overflow:hidden;color:#68766d;text-overflow:ellipsis;white-space:nowrap}.live-lock-label{top:7px!important;right:auto!important;bottom:auto!important;left:10px;padding:2px 4px;color:#617068!important;background:#000}
 @media(max-width:560px){.live-agent-card{grid-template-rows:27px 180px 63px 35px}}
+
+/* Readability pass: retain instrument density without sub-pixel typography. */
+.live-operations-head>div>span{font-size:8px}.live-operations-head h1{font-size:25px}.live-operations-head p{font-size:9px;line-height:1.45}.live-operations-head dt{font-size:7px}.live-operations-head dd{font-size:12px}.live-filters button{font-size:8px}
+.live-operations-body{grid-template-columns:minmax(0,1fr) 330px}.live-agent-card>header{padding:0 10px;font-size:7px}.live-agent-card>header b{font-size:7px}.live-lock-label{font-size:5.5px!important}.live-runtime-register b{font-size:6px}.live-runtime-register em{font-size:8.5px}.live-runtime-chart>header{font-size:5.5px}.live-runtime-chart>header b{font-size:5.5px}.live-sample-log p{grid-template-columns:48px minmax(0,1fr);font-size:6px}.live-agent-card>section small{font-size:7px}.live-agent-card>section strong{font-size:12px}.live-agent-card>section p{font-size:7px;line-height:1.5}.live-agent-card>footer{font-size:6px}.live-observer>header,.live-event-head{font-size:7px}.live-selected>span{font-size:7px}.live-selected>strong{font-size:14px}.live-selected>p{font-size:8px}.live-selected dl{grid-template-columns:90px minmax(0,1fr)}.live-selected dt,.live-selected dd{font-size:7px}.live-event-list li{min-height:34px;grid-template-columns:58px 96px minmax(0,1fr);font-size:6.5px}.live-operations-foot{font-size:8px}
+@media(max-width:1200px){.live-operations-body{grid-template-columns:minmax(0,1fr) 285px}}
+@media(max-width:900px){.live-operations-body{grid-template-columns:1fr}.live-observer{min-height:560px}}
+
+/* Anatomy miniatures replace the empty oscilloscope field. */
+.live-agent-scope:before,.live-agent-scope:after,.live-agent-scope>.live-signal-path{display:none}
+.live-agent-model{position:absolute;inset:2px 3px 91px;display:grid;place-items:center;overflow:hidden}
+.live-agent-model .iso-svg{width:100%;height:100%;max-width:340px;overflow:visible;filter:drop-shadow(0 13px 14px rgba(0,0,0,.72));transform:scale(1.07);transform-origin:center;transition:transform .45s var(--anatomy-ease)}
+.live-agent-card:hover .live-agent-model .iso-svg,.live-agent-card:focus-visible .live-agent-model .iso-svg{transform:scale(1.11) translateY(-2px)}
+.live-runtime-register{top:auto;right:9px;bottom:51px;left:9px;width:auto;z-index:3}
+.live-runtime-register>span{height:34px;background:rgba(0,0,0,.9)}
+.live-runtime-chart{right:9px;bottom:6px;left:9px;height:40px;z-index:3}
+.live-runtime-chart>header{height:14px}.live-runtime-chart svg{height:24px}
+.live-lock-label{z-index:4}
+@media(prefers-reduced-motion:reduce){.live-agent-model .iso-svg{transition:none}.live-agent-card:hover .live-agent-model .iso-svg{transform:scale(1.07)}}
+
+/* Final legibility calibration for a four-up desktop operations grid. */
+.live-agent-card>header,.live-agent-card>header b{font-size:8px}
+.live-lock-label{font-size:7px!important}
+.live-runtime-register b{font-size:7px}.live-runtime-register em{font-size:9px}
+.live-runtime-chart>header,.live-runtime-chart>header b{font-size:6.5px}
+.live-agent-card>section small{font-size:8px}.live-agent-card>section strong{font-size:13px}.live-agent-card>section p{font-size:8.5px}
+.live-agent-card>footer{font-size:7px}
+.live-observer>header,.live-event-head{font-size:8px}.live-selected>span{font-size:8px}.live-selected>p{font-size:9px}.live-selected dt,.live-selected dd{font-size:8px}
+.live-event-list li{min-height:36px;font-size:7.5px}.live-operations-foot{font-size:9px}

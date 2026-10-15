@@ -72,12 +72,15 @@ An optimization claim is not accepted because an agent reports success. The auth
 |-- home-monitor.js               real Core state projected onto home instruments
 |-- network-pages.js              Circuit, Treasury and Deploy runtime rendering
 |-- live-network.js               official and owner Agent runtime observer
+|-- agent-models.js               generated isometric Agent instrument set
 |-- ohmium-core.js                interactive silicon-floorplan controller
 |-- repository-browser.js         in-site source tree, README and code viewer
 |-- server.mjs                    Core API, authentication, persistence and events
 |-- worker.mjs                    component CLI and isolated evaluation runner
 |-- test.mjs                      lifecycle and security integration assertions
 |-- tools/build-source-index.mjs  release source-manifest generator
+|-- tools/build-agent-models.mjs  Anatomy-based Agent model generator
+|-- tools/anatomy/iso-kit.mjs     vendored MIT isometric SVG toolkit
 |-- assets/                       brand, wallet and generated circuit assets
 |-- task.example.json             complete task contract example
 |-- mutation.example.json         mutation evidence schema example

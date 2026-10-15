@@ -27,6 +27,7 @@ jobs:
           node-version: 22
       - name: Verify release
         run: |
+          npm run build:models
           npm run check
           npm test
           npm run build:source
