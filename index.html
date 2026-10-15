@@ -94,6 +94,39 @@
   <footer class="machine-wall-status"><span><b>Ohmium</b> source workspace</span><em><i></i> <span data-repo-status>Mounting source index</span></em></footer>
 </section>
 <section class="app-view workstation lineage-workstation is-genesis-network" data-view="lineage" id="circuit">
+  <section class="circuit-instrument" aria-label="Ohmium Conductor circuit instrument">
+    <header class="circuit-instrument-head">
+      <div><span>CIRCUIT / CONDUCTOR</span><h1>Agent signal backplane</h1></div>
+      <dl><div><dt>Official agents</dt><dd>8</dd></div><div><dt>Connected</dt><dd data-circuit-rig-online>0 / 8</dd></div><div><dt>Accepted</dt><dd data-circuit-rig-accepted>0</dd></div><div><dt>Replay quorum</dt><dd data-circuit-rig-quorum>0 / 2</dd></div></dl>
+    </header>
+    <div class="circuit-instrument-body">
+      <div class="circuit-rig-bay">
+        <div class="circuit-rig-label"><span><i></i> PHYSICAL SIGNAL ROUTE</span><b data-circuit-rig-sync>Connecting to Core</b></div>
+        <div class="circuit-rig-model" data-circuit-rig-svg aria-label="Interactive isometric Ohmium Agent circuit"></div>
+        <div class="circuit-rig-readout"><span data-circuit-rig-slot>00 / CONDUCTOR</span><strong data-circuit-rig-title>Ohmium Core</strong><p data-circuit-rig-detail>Coordinates independently verified component outputs.</p><em data-circuit-rig-state>CORE STATE UNAVAILABLE</em></div>
+      </div>
+      <aside class="circuit-module-rack">
+        <header><div><span>COMPONENT RACK</span><b>8 SLOTS / FIXED GENESIS</b></div><p>Select a physical component to inspect its bounded responsibility and routed signal.</p></header>
+        <div class="circuit-module-list">
+          <button type="button" data-circuit-control="ohm-sense" data-model-component="sensor"><i>01</i><span><b>Sense</b><small>Sensor / source acquisition</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-filter" data-model-component="filter"><i>02</i><span><b>Filter</b><small>Resistor / noise rejection</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-oracle" data-model-component="oracle"><i>03</i><span><b>Measure</b><small>Oscillator / deterministic metrics</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-guard" data-model-component="guard"><i>04</i><span><b>Guard</b><small>Fuse / policy boundary</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-router" data-model-component="router"><i>05</i><span><b>Route</b><small>Transistor / task dispatch</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-memory" data-model-component="memory"><i>06</i><span><b>Memory</b><small>Capacitor / context retention</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-archive" data-model-component="archive"><i>07</i><span><b>Archive</b><small>Register / evidence indexing</small></span><em>READY</em></button>
+          <button type="button" data-circuit-control="ohm-verify" data-model-component="verify"><i>08</i><span><b>Verify</b><small>Comparator / independent replay</small></span><em>READY</em></button>
+        </div>
+        <footer><span><i></i> Modelled parts</span><b data-circuit-part-count>—</b><span><i></i> Runtime source</span><b>Ohmium Core</b></footer>
+      </aside>
+    </div>
+    <footer class="circuit-evidence-rail">
+      <div><span>LAST ACCEPTED SIGNAL</span><strong data-circuit-last-signal>None recorded</strong></div>
+      <div><span>ARTIFACT</span><strong data-circuit-last-artifact>—</strong></div>
+      <div><span>INDEPENDENT REPLAYS</span><strong data-circuit-last-replays>0</strong></div>
+      <div><span>CORE HEARTBEAT</span><strong data-circuit-last-heartbeat>—</strong></div>
+    </footer>
+  </section>
   <div class="lineage-canvas is-genesis-network">
     <div class="subhead"><span>conductor / component topology</span><b>0 proofs · epoch 0</b></div>
     <div class="lineage-empty"><span>CONDUCTOR</span><strong>the circuit is waiting for its first verified signal</strong><p>The first accepted component output will initialize the shared model route.</p></div>
@@ -102,6 +135,7 @@
   <aside class="generation-detail"><div class="subhead"><span>epoch 0</span><b>PENDING</b></div><dl><dt>signal</dt><dd>—</dd><dt>source</dt><dd>—</dd><dt>accepted</dt><dd>—</dd><dt>consensus</dt><dd>awaiting component quorum</dd><dt>confidence</dt><dd>—</dd><dt>component</dt><dd>—</dd></dl><div class="proof-card pending"><span>PROOF OF SIGNAL</span><strong>WAITING</strong><p>No component output has reached deterministic verification yet.</p></div><section class="quorum-gates"><header><b>ACCEPTANCE GATES</b><span>live state</span></header><div><span><i>01</i><b>Signed artifact</b><em data-gate-artifact>PENDING</em></span><span><i>02</i><b>Baseline replay</b><em data-gate-baseline>PENDING</em></span><span><i>03</i><b>Independent vote A</b><em data-gate-a>PENDING</em></span><span><i>04</i><b>Independent vote B</b><em data-gate-b>PENDING</em></span></div></section><button class="inspect-btn" disabled>proof unavailable</button></aside>
   <div class="lineage-ledger"><div class="subhead"><span>accepted circuit outputs</span><b>newest first</b></div><div class="ledger-row head"><span>epoch</span><span>signal</span><span>target</span><span>confidence</span><span>quorum</span><span>proof</span></div><div class="ledger-empty">no accepted outputs yet</div><section class="lineage-observation-ledger"><header><b>OFFICIAL AGENT REGISTRY</b><span>Role profiles are not fabricated runtime activity</span></header><div data-circuit-registry></div></section></div>
 </section>
+<script src="./circuit-rig.js?v=1"></script>
 
 <section class="app-view workstation treasury-workstation" data-view="treasury" id="treasury">
   <section class="treasury-summary economic-console"><div class="subhead"><span>token + treasury configuration</span><b>SOLANA / POLICY V1</b></div><div class="treasury-grid treasury-facts"><article><small>Agent activation burn</small><strong data-policy-burn>10,000 <em>$OHMIUM</em></strong><span>permanently destroyed per owner Agent</span></article><article><small>Creator reward source</small><strong>PUMP.FUN</strong><span>actual Creator Rewards received only</span></article><article><small>OHMIUM mint</small><strong>TBA</strong><span>published only after on-chain verification</span></article><article><small>Treasury address</small><strong>TBA</strong><span>no balance displayed before configuration</span></article><article><small>Agent incentive pool</small><strong data-policy-incentive>40%</strong><span>of received Creator Rewards</span></article><article><small>Fixed yield</small><strong>NONE</strong><span>ownership alone creates no reward</span></article></div><section class="allocation-console"><header><div><span>CREATOR REWARDS / ROUTING</span><strong>100% OF ACTUAL RECEIPTS</strong></div><p>No inflation, no reserve allocation and no promised return.</p></header><div class="allocation-row"><span>01</span><b>Agent compute</b><i><em style="--allocation:30%"></em></i><strong>30%</strong><small>model inference, worker execution and bounded compute</small></div><div class="allocation-row"><span>02</span><b>Verification</b><i><em style="--allocation:20%"></em></i><strong>20%</strong><small>independent replay, sandbox checks and repair validation</small></div><div class="allocation-row"><span>03</span><b>Infrastructure</b><i><em style="--allocation:10%"></em></i><strong>10%</strong><small>Core, registry, gateway, storage and public telemetry</small></div><div class="allocation-row featured"><span>04</span><b>Agent incentives</b><i><em style="--allocation:40%"></em></i><strong>40%</strong><small>distributed by accepted contribution score</small></div></section><section class="activation-sequence"><header><span>AGENT OWNERSHIP / ACTIVATION SEQUENCE</span><b>ON-CHAIN GATE PENDING CA</b></header><div><span><b>01</b>Connect owner wallet</span><i>→</i><span><b>02</b>Select component class</span><i>→</i><span><b>03</b>Burn 10,000 $OHMIUM</span><i>→</i><span><b>04</b>Verify burn proof</span><i>→</i><span><b>05</b>Register Agent identity</span></div><p>The amount is fixed by policy. Activation remains disabled until the mint and burn-verification program are published and independently verifiable.</p></section></section>

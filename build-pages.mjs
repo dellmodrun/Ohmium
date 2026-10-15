@@ -7,7 +7,7 @@ if (!output.startsWith(`${root}\\`) && !output.startsWith(`${root}/`)) throw new
 rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
 
-const files = ["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "repository-browser.js", "network-pages.js", "agent-models.js", "live-network.js", "ohmium-core.js", "source-index.json"];
+const files = ["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "repository-browser.js", "network-pages.js", "agent-models.js", "live-network.js", "ohmium-core.js", "circuit-rig.js", "source-index.json"];
 for (const file of files) cpSync(resolve(root, file), resolve(output, file));
 cpSync(resolve(root, "assets"), resolve(output, "assets"), { recursive: true });
 
