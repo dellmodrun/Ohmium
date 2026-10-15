@@ -16,6 +16,17 @@
     if (seconds < 60) return `Heartbeat ${seconds}s ago`;
     return `Heartbeat ${Math.floor(seconds / 60)}m ago`;
   };
+  const duration = (seconds) => {
+    const value = Math.max(0, Number(seconds) || 0);
+    if (value >= 3600) return `${Math.floor(value / 3600)}h ${Math.floor((value % 3600) / 60)}m`;
+    return `${Math.floor(value / 60)}m ${Math.floor(value % 60)}s`;
+  };
+  const wave = (samples) => {
+    const values = (samples || []).slice(-24).map((sample) => Number(sample.cpuPct)).filter(Number.isFinite);
+    const series = values.length > 1 ? values : [0, 0];
+    const high = Math.max(1, ...series);
+    return series.map((value, index) => `${(index / (series.length - 1)) * 100},${26 - (value / high) * 20}`).join(" ");
+  };
 
   function agentsFrom(data) {
     const machines = data.state?.machines || [];
@@ -45,12 +56,21 @@
     const active = status === "online" || status === "busy";
     const owner = agent.official ? "OHMIUM GENESIS" : (agent.wallet ? short(agent.wallet) : "OWNER WALLET UNPUBLISHED");
     const load = Number.isFinite(Number(agent.load)) ? `${Math.round(Number(agent.load) * 100)}% load` : "Load not reported";
+    const telemetry = agent.telemetry || {};
+    const samples = Array.isArray(agent.samples) ? agent.samples : [];
+    const cpu = Number.isFinite(Number(telemetry.cpuPct)) ? `${Number(telemetry.cpuPct).toFixed(1)}%` : "—";
+    const rss = Number.isFinite(Number(telemetry.rssMb)) ? `${Number(telemetry.rssMb).toFixed(1)} MB` : "—";
+    const uptime = telemetry.uptimeSec == null ? "—" : duration(telemetry.uptimeSec);
+    const lastSamples = samples.slice(-3).reverse();
     return `<button class="live-agent-card ${active ? "is-online" : "is-offline"} ${selectedId === agent.id ? "is-selected" : ""}" type="button" data-live-agent="${escapeHtml(agent.id)}" data-kind="${agent.official ? "official" : "community"}">
       <header><span>${agent.official ? `GENESIS / ${escapeHtml(agent.slot || String(index + 1).padStart(2, "0"))}` : "OWNER DEPLOYED"}</span><b>${escapeHtml(status.toUpperCase())}</b></header>
       <div class="live-agent-scope">
         <div class="live-component-symbol" data-component="${escapeHtml(String(agent.component || "component").toLowerCase())}"><i></i><i></i><b></b><em></em></div>
         <div class="live-signal-path"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <span>${escapeHtml(active ? "HEARTBEAT LOCKED" : "SIGNAL OPEN")}</span>
+        <div class="live-runtime-register"><span><b>CPU</b><em>${escapeHtml(cpu)}</em></span><span><b>RSS</b><em>${escapeHtml(rss)}</em></span><span><b>UPTIME</b><em>${escapeHtml(uptime)}</em></span></div>
+        <div class="live-runtime-chart"><header><span>PROCESS CPU / ${samples.length} SAMPLES</span><b>${escapeHtml(active ? "CAPTURING" : "NO SIGNAL")}</b></header><svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 26H100M0 16H100M0 6H100"/><polyline points="${wave(samples)}"/></svg></div>
+        <div class="live-sample-log">${lastSamples.length ? lastSamples.map((sample) => `<p><time>${escapeHtml(time(sample.at))}</time><span>${escapeHtml(sample.activity)}</span></p>`).join("") : "<p><time>—</time><span>Awaiting first runtime sample</span></p>"}</div>
+        <span class="live-lock-label">${escapeHtml(active ? "HEARTBEAT LOCKED" : "SIGNAL OPEN")}</span>
       </div>
       <section><small>${escapeHtml(agent.component || "Component")}</small><strong>${escapeHtml(agent.role || agent.name)}</strong><p>${escapeHtml(agent.activity || agent.responsibility || "Awaiting worker activity")}</p></section>
       <footer><span>${escapeHtml(owner)}</span><time datetime="${escapeHtml(agent.lastSeenAt || "")}" title="${escapeHtml(agent.lastSeenAt || "No heartbeat received")}">${escapeHtml(age(agent.lastSeenAt))}</time><em>${escapeHtml(load)}</em></footer>

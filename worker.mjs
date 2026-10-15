@@ -84,9 +84,16 @@ try {
   } else if (commandName === "start") {
     requireConfig();
     const automatic = args.includes("--auto") || option("role") === "verifier";
-    let verifying = false;
+    let verifying = false, jobsCompleted = 0, failures = 0, previousCpu = process.cpuUsage(), previousCpuAt = process.hrtime.bigint();
+    const runtimeTelemetry = () => {
+      const currentCpu = process.cpuUsage(), currentAt = process.hrtime.bigint(), memory = process.memoryUsage();
+      const elapsedUs = Number(currentAt - previousCpuAt) / 1000;
+      const usedUs = (currentCpu.user - previousCpu.user) + (currentCpu.system - previousCpu.system);
+      previousCpu = currentCpu; previousCpuAt = currentAt;
+      return { cpuPct: Number(Math.max(0, Math.min(100, elapsedUs > 0 ? (usedUs / elapsedUs) * 100 : 0)).toFixed(2)), rssMb: Number((memory.rss / 1048576).toFixed(2)), heapMb: Number((memory.heapUsed / 1048576).toFixed(2)), uptimeSec: Math.floor(process.uptime()), jobsCompleted, failures };
+    };
     const heartbeat = async (status, activity = process.env.OHMIUM_ACTIVITY || "idle; polling verification queue") => {
-      const result = await api("/api/machines/heartbeat", { method: "POST", body: JSON.stringify({ status: status || "online", activity }) });
+      const result = await api("/api/machines/heartbeat", { method: "POST", body: JSON.stringify({ status: status || "online", activity, telemetry: runtimeTelemetry() }) });
       console.log(`${new Date().toISOString()} heartbeat ${result.machine.id} ${result.machine.status}`);
     };
     const verifyQueue = async () => {
@@ -101,8 +108,9 @@ try {
           await heartbeat("busy", `verifying ${mutation.id}`);
           const full = await api(`/api/mutations/${mutation.id}`), result = await sandbox(task, full.mutation.patch);
           await api(`/api/mutations/${mutation.id}/verify`, { method: "POST", body: JSON.stringify({ observedBaselineMetric: result.baselineMetric, observedMetric: result.candidateMetric, testsPassed: result.testsPassed }) });
+          jobsCompleted += 1;
         }
-      } catch (error) { console.error(`${new Date().toISOString()} auto-verify: ${error.message}`); }
+      } catch (error) { failures += 1; console.error(`${new Date().toISOString()} auto-verify: ${error.message}`); }
       finally { verifying = false; await heartbeat("online").catch(() => {}); }
     };
     await heartbeat("online"); await verifyQueue();

@@ -17,6 +17,7 @@ try {
   const task = (await call("/api/tasks", "POST", { title: "Allocator hot path", repository: "https://github.com/example/runtime", baseCommit: "0123456789abcdef", target: "src/hot.rs", dockerImage: "rust:1.82-alpine", testCommand: ["cargo", "test", "--locked"], benchmarkCommand: ["./bench-json"], metric: "p95_ms", lowerIsBetter: true, minGainPct: 2 })).task;
   const workers = [];
   for (const name of ["author-01", "verifier-01", "verifier-02"]) workers.push(await call("/api/machines/register", "POST", { name, target: "rust", cpu: 4, memoryGb: 8 }));
+  await call("/api/machines/heartbeat", "POST", { status: "online", activity: "measuring allocator baseline", telemetry: { cpuPct: 12.5, rssMb: 48.25, heapMb: 11.75, uptimeSec: 9, jobsCompleted: 0, failures: 0 } }, workers[0].secret);
   await call(`/api/tasks/${task.id}/claim`, "POST", {}, workers[0].secret);
   const patch = "diff --git a/src/hot.rs b/src/hot.rs\n--- a/src/hot.rs\n+++ b/src/hot.rs\n@@ -1 +1 @@\n-old\n+new\n", patchDigest = createHash("sha256").update(patch).digest("hex");
   const submitted = await call("/api/mutations", "POST", { taskId: task.id, patch, patchDigest, summary: "automated consensus test", baselineMetric: 100, candidateMetric: 90, testsPassed: true }, workers[0].secret);
@@ -28,8 +29,9 @@ try {
   if (accepted.mutation.status !== "accepted" || accepted.mutation.generation !== 1) throw new Error("mutation did not enter generation 1");
   const state = await call("/api/state");
   if (state.tasks[0].status !== "complete" || state.machines.length !== 3 || state.lineage.length !== 1) throw new Error("state lifecycle mismatch");
+  if (state.machines[0].samples?.length !== 1 || state.machines[0].telemetry?.rssMb !== 48.25) throw new Error("worker runtime telemetry was not persisted");
   if ((await fetch(`${base}/data/state.json`)).status !== 404) throw new Error("private state is publicly readable");
-  console.log("PASS: official agent catalog, empty-state integrity, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
+  console.log("PASS: official agent catalog, runtime telemetry, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
 } finally {
   child.kill();
   await new Promise((resolve) => child.once("exit", resolve));

@@ -14,10 +14,10 @@ const allowedOrigin = process.env.OHMIUM_ALLOWED_ORIGIN || "";
 const clients = new Set(), rate = new Map(), metrics = { startedAt: Date.now(), requests: 0 };
 const officialCatalog = JSON.parse(readFileSync(resolve(root, "official-agents.json"), "utf8"));
 
-const emptyState = () => ({ version: 3, createdAt: new Date().toISOString(), tasks: [], machines: [], mutations: [], lineage: [], events: [], treasury: { network: "solana", initialized: false, address: null, balanceSol: null, updatedAt: null } });
+const emptyState = () => ({ version: 4, createdAt: new Date().toISOString(), tasks: [], machines: [], mutations: [], lineage: [], events: [], treasury: { network: "solana", initialized: false, address: null, balanceSol: null, updatedAt: null } });
 mkdirSync(dataDir, { recursive: true });
 let state = existsSync(dataFile) ? JSON.parse(readFileSync(dataFile, "utf8")) : emptyState();
-state = { ...emptyState(), ...state, version: 3 };
+state = { ...emptyState(), ...state, version: 4 };
 
 const now = () => new Date().toISOString();
 const hash = (value) => createHash("sha256").update(value).digest("hex");
@@ -98,10 +98,30 @@ const server = http.createServer(async (request, response) => {
       if (registrationKey && !equal(supplied, registrationKey)) return json(response, 403, { error: "valid registration key required" });
       if (!validName(input.name)) return json(response, 422, { error: "name must be 3-24 lowercase letters, numbers or hyphens" });
       if (state.machines.some((machine) => machine.name === input.name)) return json(response, 409, { error: "machine name already registered" });
-      const secret = `ohm_sk_${randomBytes(24).toString("base64url")}`, machine = { id: id("machine"), name: input.name, target: String(input.target || "general").slice(0, 80), repository: String(input.repository || "").slice(0, 240), wallet: input.wallet ? String(input.wallet).slice(0, 64) : null, resources: { cpu: Math.max(1, Math.min(128, Number(input.cpu) || 1)), memoryGb: Math.max(1, Math.min(512, Number(input.memoryGb) || 1)) }, status: "online", activity: "registered; awaiting worker heartbeat", createdAt: now(), lastSeenAt: now(), secretHash: hash(secret) };
+      const secret = `ohm_sk_${randomBytes(24).toString("base64url")}`, machine = { id: id("machine"), name: input.name, target: String(input.target || "general").slice(0, 80), repository: String(input.repository || "").slice(0, 240), wallet: input.wallet ? String(input.wallet).slice(0, 64) : null, resources: { cpu: Math.max(1, Math.min(128, Number(input.cpu) || 1)), memoryGb: Math.max(1, Math.min(512, Number(input.memoryGb) || 1)) }, status: "online", activity: "registered; awaiting worker heartbeat", telemetry: null, samples: [], createdAt: now(), lastSeenAt: now(), secretHash: hash(secret) };
       state.machines.push(machine); emit("machine.registered", { machine: cleanMachine(machine) }); return json(response, 201, { machine: cleanMachine(machine), secret, warning: "Store this secret now. It is never returned again." });
     }
-    if (request.method === "POST" && path === "/api/machines/heartbeat") { const machine = machineAuth(request); if (!machine) return json(response, 401, { error: "valid machine bearer token required" }); const input = await body(request); machine.lastSeenAt = now(); machine.status = input.status === "busy" ? "busy" : "online"; machine.activity = String(input.activity || machine.activity || "idle").slice(0, 120); if (finite(input.load)) machine.load = Math.max(0, Math.min(1, Number(input.load))); persist(); return json(response, 200, { ok: true, machine: cleanMachine(machine) }); }
+    if (request.method === "POST" && path === "/api/machines/heartbeat") {
+      const machine = machineAuth(request); if (!machine) return json(response, 401, { error: "valid machine bearer token required" });
+      const input = await body(request), at = now(), reported = input.telemetry && typeof input.telemetry === "object" ? input.telemetry : {};
+      machine.lastSeenAt = at;
+      machine.status = input.status === "busy" ? "busy" : "online";
+      machine.activity = String(input.activity || machine.activity || "idle").slice(0, 120);
+      machine.telemetry = {
+        cpuPct: finite(reported.cpuPct) ? Math.max(0, Math.min(100, Number(reported.cpuPct))) : null,
+        rssMb: finite(reported.rssMb) ? Math.max(0, Math.min(1048576, Number(reported.rssMb))) : null,
+        heapMb: finite(reported.heapMb) ? Math.max(0, Math.min(1048576, Number(reported.heapMb))) : null,
+        uptimeSec: finite(reported.uptimeSec) ? Math.max(0, Number(reported.uptimeSec)) : null,
+        jobsCompleted: finite(reported.jobsCompleted) ? Math.max(0, Math.floor(Number(reported.jobsCompleted))) : 0,
+        failures: finite(reported.failures) ? Math.max(0, Math.floor(Number(reported.failures))) : 0
+      };
+      if (finite(input.load)) machine.load = Math.max(0, Math.min(1, Number(input.load)));
+      machine.samples = Array.isArray(machine.samples) ? machine.samples : [];
+      machine.samples.push({ at, status: machine.status, activity: machine.activity, ...machine.telemetry });
+      machine.samples = machine.samples.slice(-36);
+      persist();
+      return json(response, 200, { ok: true, machine: cleanMachine(machine) });
+    }
     if (request.method === "POST" && path === "/api/mutations") {
       const machine = machineAuth(request); if (!machine) return json(response, 401, { error: "valid machine bearer token required" });
       const input = await body(request), task = state.tasks.find((item) => item.id === input.taskId); if (!task) return json(response, 422, { error: "valid taskId required" }); if (task.claimedBy !== machine.id) return json(response, 409, { error: "machine must claim this task first" });

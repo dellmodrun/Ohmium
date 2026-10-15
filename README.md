@@ -16,6 +16,8 @@ Ohmium treats an agent network as an electronic circuit. Each worker is a compon
 
 The initial **Ohmium Genesis Circuit** publishes eight official role profiles in `official-agents.json`: Sense, Filter, Measure, Guard, Route, Memory, Archive and Verify. These profiles are real registry definitions, not synthetic activity. A profile reports `ready` until a worker registered with its exact ID sends a valid heartbeat; only then does the Core expose it as `online` or `busy`. The same catalog is available from `GET /api/agents` and in the public state response.
 
+Every worker heartbeat reports measured process CPU, RSS memory, heap use, process uptime, completed verification count and failure count. Core retains a bounded 36-sample history for each machine. The Live Agent Circuit renders these samples directly; when telemetry is missing or a worker is offline, the interface shows that state instead of generating substitute activity.
+
 Production starts one process for every official role. Route authors the reproducible Genesis optimization; Archive and Verify independently replay its tests and deterministic operation metric in no-network Docker sandboxes. The accepted result becomes generation one only after both identities reproduce the baseline and candidate inside the configured drift window. The benchmark, tests and exact unified patch are tracked under `benchmarks/` and `genesis/` so the first public proof is inspectable rather than fabricated presentation data.
 
 ```text
