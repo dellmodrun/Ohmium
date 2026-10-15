@@ -1,4 +1,4 @@
-name: Deploy Cellumo to GitHub Pages
+name: Deploy Ohmium to GitHub Pages
 
 on:
   push:
