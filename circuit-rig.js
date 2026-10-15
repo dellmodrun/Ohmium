@@ -72,7 +72,7 @@
     button.addEventListener("pointerenter", () => select(button.dataset.modelComponent));
   });
 
-  fetch("./assets/ohmium-circuit-core.svg?v=6")
+  fetch("./assets/ohmium-signal-backplane.svg?v=1")
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();
