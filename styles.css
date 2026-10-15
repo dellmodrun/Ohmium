@@ -419,10 +419,10 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .awaiting span{margin-top:8px!important;color:#55635b!important;font-size:8px!important}
 
 /* Anatomy figure — precision Ohmium circuit test bench */
-.ohmium-core-stage{position:relative;isolation:isolate;min-height:0;background:#000!important}
-.ohmium-core-figure{position:absolute;inset:4px 14px 84px;z-index:1;display:grid;place-items:center}
-.ohmium-core-figure>svg{width:100%;height:100%;max-width:720px;transform:translateY(-5px);filter:drop-shadow(0 16px 20px rgba(0,0,0,.72))}
-.ohmium-core-readout{position:absolute;right:18px;bottom:14px;left:18px;z-index:3;display:grid;grid-template-columns:110px minmax(150px,.72fr) 1fr;align-items:center;min-height:42px;border-top:1px solid #29372d;color:#66746b;background:#000;font:8px/1.35 var(--mono)}
+.ohmium-core-stage{position:relative;display:grid;isolation:isolate;min-height:0;grid-template-rows:minmax(0,1fr) 56px;padding:0 18px;background:#000!important}
+.ohmium-core-figure{position:relative;z-index:1;display:grid;min-width:0;min-height:0;padding:8px 0 18px;place-items:center;overflow:hidden}
+.ohmium-core-figure>svg{width:100%;height:100%;max-width:680px;max-height:100%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.72))}
+.ohmium-core-readout{position:relative;z-index:3;display:grid;grid-template-columns:110px minmax(150px,.72fr) 1fr;align-items:center;min-width:0;min-height:42px;border-top:1px solid #29372d;color:#66746b;background:#000;font:8px/1.35 var(--mono)}
 .ohmium-core-readout>span{color:var(--acid);letter-spacing:.08em;text-transform:uppercase}
 .ohmium-core-readout>strong{padding:0 14px;border-left:1px solid #29372d;color:#d8e0da;font-size:9px;font-weight:500}
 .ohmium-core-readout>p{overflow:hidden;margin:0;padding-left:14px;border-left:1px solid #29372d;color:#69766e;text-overflow:ellipsis;white-space:nowrap}
@@ -437,5 +437,5 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .component-station.is-active{transform:translateY(-6px)}
 .central-core{transform-box:fill-box;transform-origin:center;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
 .central-core.is-active{transform:translateY(-4px)}
-@media(max-width:1050px){.ohmium-core-figure{inset:24px 18px 86px}.ohmium-core-readout{grid-template-columns:90px 150px 1fr}}
-@media(max-width:680px){.cell-live,.cell-intro,.cell-screen,.ohmium-core-stage{width:100%!important;max-width:100vw!important;min-width:0!important}.ohmium-core-stage{overflow:hidden!important}.ohmium-core-figure{inset:48px 14px 88px}.ohmium-core-readout{right:12px;bottom:12px;left:12px;grid-template-columns:82px minmax(0,1fr)}.ohmium-core-readout>p{display:none}.ohmium-core-state{top:12px;left:12px}.ohmium-core-inspect{top:12px;right:12px;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+@media(max-width:1050px){.ohmium-core-stage{grid-template-rows:minmax(0,1fr) 58px}.ohmium-core-figure{padding:24px 0 18px}.ohmium-core-readout{grid-template-columns:90px 150px 1fr}}
+@media(max-width:680px){.cell-live,.cell-intro,.cell-screen,.ohmium-core-stage{width:100%!important;max-width:100vw!important;min-width:0!important}.ohmium-core-stage{grid-template-rows:minmax(0,1fr) 58px;padding:0 12px;overflow:hidden!important}.ohmium-core-figure{padding:48px 12px 18px}.ohmium-core-readout{grid-template-columns:82px minmax(0,1fr)}.ohmium-core-readout>p{display:none}.ohmium-core-state{top:12px;left:12px}.ohmium-core-inspect{top:12px;right:12px;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
