@@ -18,27 +18,29 @@
   function renderThermalMap(telemetry) {
     const svg = one("[data-thermal-map]");
     if (!svg) return;
-    const samples = samplesOf(telemetry).slice(-28), memory = samples.map((item) => Number(item.rssMb) || 0);
-    const low = Math.min(...memory), high = Math.max(...memory), span = high - low || 1;
+    const samples = samplesOf(telemetry).slice(-48), memory = samples.map((item) => Number(item.rssMb) || 0), deltas = samples.map((item, index) => requestDelta(samples, index));
+    const memoryMean = memory.reduce((total, value) => total + value, 0) / memory.length, requestMean = deltas.reduce((total, value) => total + value, 0) / deltas.length;
+    const memoryRange = Math.max(.1, ...memory.map((value) => Math.abs(value - memoryMean))), requestRange = Math.max(1, ...deltas.map((value) => Math.abs(value - requestMean)));
+    const loads = samples.map((item, index) => deltas[index] + (Number(item.openTasks) || 0) * 2 + (Number(item.verifying) || 0) * 3 + Math.max(0, memory[index] - memoryMean));
+    const loadLow = Math.min(...loads), loadHigh = Math.max(...loads), loadRange = loadHigh - loadLow || 1;
     const points = samples.map((item, index) => {
-      const x = 28 + (samples.length === 1 ? 152 : index * (304 / (samples.length - 1)));
-      const y = 125 - ((Number(item.rssMb) - low) / span) * 93;
-      const activity = requestDelta(samples, index) + (Number(item.openTasks) || 0) * 2 + (Number(item.verifying) || 0) * 3;
-      const radius = Math.min(38, 19 + activity * 3);
-      const opacity = Math.min(.9, .34 + activity * .09);
-      return { x, y, radius, opacity };
+      const x = 180 + ((deltas[index] - requestMean) / requestRange) * 132;
+      const y = 75 - ((memory[index] - memoryMean) / memoryRange) * 51;
+      const intensity = (loads[index] - loadLow) / loadRange, band = intensity > .66 ? "hot" : intensity > .3 ? "warm" : "cool";
+      return { x, y, radius: 20 + intensity * 17, opacity: .32 + intensity * .53, intensity, band };
     });
     const trend = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
-    svg.innerHTML = `<defs><radialGradient id="thermal-spot"><stop offset="0" stop-color="#b9ff89" stop-opacity=".95"/><stop offset=".34" stop-color="#7fe03a" stop-opacity=".62"/><stop offset="1" stop-color="#7fe03a" stop-opacity="0"/></radialGradient><filter id="thermal-blur"><feGaussianBlur stdDeviation="7"/></filter></defs><g class="thermal-grid"><path d="M22 24H338M22 57H338M22 90H338M22 123H338M62 15V135M112 15V135M162 15V135M212 15V135M262 15V135M312 15V135"/></g><g class="thermal-cloud" filter="url(#thermal-blur)">${points.map((point) => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="${point.radius}" fill="url(#thermal-spot)" opacity="${point.opacity.toFixed(2)}"/>`).join("")}</g><path class="thermal-contour" d="${trend}"/><g class="thermal-labels"><text x="22" y="146">−${Math.max(0, (samples.length - 1) * 2)}s</text><text x="314" y="146">NOW</text><text x="338" y="20" text-anchor="end">${high.toFixed(1)} MB</text></g>`;
+    const latest = points.at(-1), latestDelta = deltas.at(-1) - requestMean, latestMemory = memory.at(-1) - memoryMean;
+    svg.innerHTML = `<defs><radialGradient id="thermal-cool"><stop offset="0" stop-color="#9cff64" stop-opacity=".95"/><stop offset=".38" stop-color="#62d83a" stop-opacity=".58"/><stop offset="1" stop-color="#42b832" stop-opacity="0"/></radialGradient><radialGradient id="thermal-warm"><stop offset="0" stop-color="#fff39a" stop-opacity=".98"/><stop offset=".38" stop-color="#e8ce32" stop-opacity=".7"/><stop offset="1" stop-color="#d7b926" stop-opacity="0"/></radialGradient><radialGradient id="thermal-hot"><stop offset="0" stop-color="#ffd0a3" stop-opacity="1"/><stop offset=".34" stop-color="#ff704b" stop-opacity=".78"/><stop offset="1" stop-color="#df342f" stop-opacity="0"/></radialGradient><filter id="thermal-blur"><feGaussianBlur stdDeviation="7.5"/></filter></defs><g class="thermal-grid"><path d="M22 24H338M22 50H338M22 75H338M22 100H338M22 126H338M48 14V136M92 14V136M136 14V136M180 14V136M224 14V136M268 14V136M312 14V136"/></g><g class="thermal-axes"><path d="M22 75H338M180 14V136"/><circle cx="180" cy="75" r="2.5"/></g><g class="thermal-cloud" filter="url(#thermal-blur)">${points.map((point) => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="${point.radius.toFixed(1)}" fill="url(#thermal-${point.band})" opacity="${point.opacity.toFixed(2)}"/>`).join("")}</g><path class="thermal-contour" d="${trend}"/><g class="thermal-cursor"><path d="M${latest.x.toFixed(1)} ${(latest.y - 7).toFixed(1)}V${(latest.y + 7).toFixed(1)}M${(latest.x - 7).toFixed(1)} ${latest.y.toFixed(1)}H${(latest.x + 7).toFixed(1)}"/><circle cx="${latest.x.toFixed(1)}" cy="${latest.y.toFixed(1)}" r="3"/></g><g class="thermal-labels"><text x="22" y="146">LOW ΔREQ</text><text x="338" y="146" text-anchor="end">HIGH ΔREQ</text><text x="185" y="20">+ RSS</text><text x="185" y="132">− RSS</text><text x="338" y="12" text-anchor="end">X ${latestDelta >= 0 ? "+" : ""}${latestDelta.toFixed(1)} · Y ${latestMemory >= 0 ? "+" : ""}${latestMemory.toFixed(1)} MB</text></g>`;
     set("[data-thermal-mode]", `LIVE · ${samples.length} SAMPLES`);
   }
 
   function renderActivityGrid(telemetry) {
     const grid = one("[data-activity-grid]");
     if (!grid) return;
-    const samples = samplesOf(telemetry).slice(-98), padded = Array(Math.max(0, 98 - samples.length)).fill(null).concat(samples);
+    const samples = samplesOf(telemetry).slice(-140), padded = Array(Math.max(0, 140 - samples.length)).fill(null).concat(samples);
     const values = samples.map((item, index) => requestDelta(samples, index) + (Number(item.openTasks) || 0) * 2 + (Number(item.verifying) || 0) * 3 + (Number(item.onlineMachines) || 0));
-    const peak = Math.max(1, ...values), offset = 98 - samples.length;
+    const peak = Math.max(1, ...values), offset = 140 - samples.length;
     grid.innerHTML = padded.map((item, index) => {
       if (!item) return '<i class="level-0 is-empty"></i>';
       const value = values[index - offset] || 0, level = value === 0 ? 0 : Math.min(4, Math.max(1, Math.ceil((value / peak) * 4)));
@@ -65,8 +67,9 @@
       const mode = candle.close > candle.open ? "up" : candle.close < candle.open ? "down" : "flat";
       return `<g class="candle ${mode}"><line x1="${x.toFixed(1)}" y1="${highY.toFixed(1)}" x2="${x.toFixed(1)}" y2="${lowY.toFixed(1)}"/><rect x="${(x - width / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${width.toFixed(1)}" height="${height.toFixed(1)}"/></g>`;
     }).join("");
-    svg.innerHTML = `<g class="market-grid"><path d="M25 28H336M25 57H336M25 87H336M25 116H336M25 146H336"/></g>${marks}<g class="market-labels"><text x="337" y="25" text-anchor="end">${rawHigh.toFixed(1)}</text><text x="337" y="144" text-anchor="end">${rawLow.toFixed(1)}</text><text x="25" y="160">${candles.length ? clock(candles[0].at) : "—"}</text><text x="336" y="160" text-anchor="end">${candles.length ? clock(candles.at(-1).at) : "—"}</text></g>`;
     const latest = candles.at(-1);
+    const latestY = latest ? y(latest.close) : 87;
+    svg.innerHTML = `<g class="market-grid"><path d="M25 28H336M25 57H336M25 87H336M25 116H336M25 146H336M25 18V146M77 18V146M129 18V146M181 18V146M233 18V146M285 18V146M336 18V146"/></g>${marks}<g class="market-current"><line x1="25" y1="${latestY.toFixed(1)}" x2="336" y2="${latestY.toFixed(1)}"/><rect x="309" y="${(latestY - 7).toFixed(1)}" width="27" height="12"/><text x="332" y="${(latestY + 1.5).toFixed(1)}" text-anchor="end">${latest ? latest.close.toFixed(1) : "—"}</text></g><g class="market-labels"><text x="337" y="25" text-anchor="end">${rawHigh.toFixed(1)}</text><text x="337" y="144" text-anchor="end">${rawLow.toFixed(1)}</text><text x="25" y="160">${candles.length ? clock(candles[0].at) : "—"}</text><text x="336" y="160" text-anchor="end">${candles.length ? clock(candles.at(-1).at) : "—"}</text></g>`;
     if (latest) Object.entries(latest).forEach(([name, value]) => { if (name !== "at") set(`[data-ohlc="${name}"]`, `${Number(value).toFixed(1)}`); });
     set("[data-market-mode]", `${candles.length} CANDLES · RSS MB`);
   }
