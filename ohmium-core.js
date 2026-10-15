@@ -17,7 +17,7 @@
     verify: ["Verify / 08", "Checks output evidence before the shared model can accept it."],
   };
 
-  fetch("./assets/ohmium-circuit-core.svg?v=2")
+  fetch("./assets/ohmium-circuit-core.svg?v=3")
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();

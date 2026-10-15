@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
 const WIDTH = 720;
 const HEIGHT = 510;
-const BOARD = { x: -124, y: -96, w: 248, d: 192, r: 7 };
+const BOARD = { x: -120, y: -120, w: 240, d: 240, r: 120 };
 const P = k.fitProjection([...k.boxCorners(BOARD, -10, 43)], WIDTH, HEIGHT, {
   pad: 35,
   headroom: 26,
@@ -22,33 +22,41 @@ const slab = (plan, z, h, style = {}) => S(k.slabOf(plan, z, h, P, 5, Math.min(1
 const cyl = (x, y, r, z, h, style = {}) => S(k.cylinder(x, y, r, z, h, P, 28, .5), style);
 const line3 = (pts, style = {}) => L(k.pathOf(pts.map(at)), style);
 
-const stations = [
-  { id: "sensor", label: "SENSE", x: -91, y: -57, type: "can" },
-  { id: "filter", label: "FILTER", x: -32, y: -64, type: "coil" },
-  { id: "memory", label: "MEMORY", x: 33, y: -64, type: "chip" },
-  { id: "router", label: "ROUTE", x: 91, y: -55, type: "relay" },
-  { id: "oracle", label: "ORACLE", x: -91, y: 52, type: "relay" },
-  { id: "guard", label: "GUARD", x: -32, y: 64, type: "chip" },
-  { id: "archive", label: "ARCHIVE", x: 33, y: 64, type: "coil" },
-  { id: "verify", label: "VERIFY", x: 91, y: 52, type: "can" },
+const stationSpec = [
+  ["sensor", "SENSE", "can"], ["filter", "FILTER", "coil"],
+  ["memory", "MEMORY", "chip"], ["router", "ROUTE", "relay"],
+  ["verify", "VERIFY", "can"], ["archive", "ARCHIVE", "coil"],
+  ["guard", "GUARD", "chip"], ["oracle", "ORACLE", "relay"],
 ];
+const stations = stationSpec.map(([id, label, type], index) => {
+  const angle = (-112.5 + index * 45) * Math.PI / 180;
+  return { id, label, type, x: Math.cos(angle) * 76, y: Math.sin(angle) * 76 };
+});
 
 function foundation() {
   const out = [];
-  for (const [x, y] of k.corners(BOARD, 12)) {
+  for (let index = 0; index < 6; index++) {
+    const angle = index * Math.PI / 3;
+    const x = Math.cos(angle) * 91;
+    const y = Math.sin(angle) * 91;
     out.push(cyl(x, y, 7, -10, 3, { tone: "lo", className: "part foot" }));
     out.push(cyl(x, y, 5, -7, 4, { tone: "lo", className: "part isolator" }));
   }
-  out.push(slab(BOARD, -3, 8, { tone: "mid", crease: "lo", halo: true, className: "part lower-deck" }));
-  out.push(slab(k.insetPlan(BOARD, 7), 5, 3, { tone: "mid", crease: "faint", className: "part pcb" }));
-  out.push(L(k.planOutline(k.insetPlan(BOARD, 13), 8.2, P, 6), { tone: "faint" }));
-  for (const [x, y] of k.corners(BOARD, 16)) {
+  out.push(cyl(0, 0, 116, -3, 8, { tone: "mid", crease: "lo", halo: true, className: "part lower-deck" }));
+  out.push(cyl(0, 0, 109, 5, 3, { tone: "mid", crease: "faint", className: "part pcb" }));
+  out.push(L(k.ring(0, 0, 101, 8.2, P, 72), { tone: "lo" }));
+  out.push(L(k.ring(0, 0, 94, 8.3, P, 72), { tone: "faint" }));
+  for (let index = 0; index < 8; index++) {
+    const angle = (index * Math.PI) / 4;
+    const x = Math.cos(angle) * 102;
+    const y = Math.sin(angle) * 102;
     out.push(cyl(x, y, 3.1, 8, 1.3, { tone: "hi", className: "part screw" }));
     out.push(line3([[x - 1.3, y, 9.35], [x + 1.3, y, 9.35]], { tone: "lo", free: true }));
   }
-  for (const y of [-75, -70, 70, 75]) {
-    out.push(line3([[-103, y, 8.4], [-68, y, 8.4]], { tone: "faint" }));
-    out.push(line3([[68, y, 8.4], [103, y, 8.4]], { tone: "faint" }));
+  const ticks = k.radialTicks(0, 0, 106, 64, 8, 8.4, [2.5, 5], P);
+  out.push(L(ticks.minor, { tone: "faint" }), L(ticks.major, { tone: "lo" }));
+  for (const radius of [42, 47]) {
+    out.push(L(k.ring(0, 0, radius, 8.4, P, 56), { tone: "faint" }));
   }
   return out.join("");
 }
@@ -56,15 +64,20 @@ function foundation() {
 function traces() {
   const out = [];
   for (const [index, station] of stations.entries()) {
-    const sx = station.x > 0 ? station.x - 17 : station.x + 17;
-    const sy = station.y > 0 ? station.y - 12 : station.y + 12;
-    const mx = Math.sign(station.x) * 48;
-    const my = Math.sign(station.y) * 32;
-    const pts = [[sx, sy, 8.7], [mx, sy, 8.7], [mx, my, 8.7], [Math.sign(station.x) * 29, my, 8.7]];
+    const length = Math.hypot(station.x, station.y);
+    const ux = station.x / length;
+    const uy = station.y / length;
+    const sx = station.x - ux * 18;
+    const sy = station.y - uy * 18;
+    const elbowX = ux * 49;
+    const elbowY = uy * 49;
+    const endX = ux * 33;
+    const endY = uy * 33;
+    const pts = [[sx, sy, 8.7], [elbowX, elbowY, 8.7], [endX, endY, 8.7]];
     out.push(`<g class="signal-route route-${station.id}" data-route="${station.id}">${line3(pts, { tone: index === 0 ? "mid" : "lo", className: "route-line", free: true })}</g>`);
-    const offset = index % 2 ? 3.2 : -3.2;
-    out.push(line3(pts.map(([x, y, z]) => [x, y + offset, z]), { tone: "faint", free: true }));
-    out.push(k.dotsSvg([at([sx, sy, 9]), at([Math.sign(station.x) * 29, my, 9])], { size: 1, tone: "lo" }));
+    const offset = index % 2 ? 2.8 : -2.8;
+    out.push(line3(pts.map(([x, y, z]) => [x - uy * offset, y + ux * offset, z]), { tone: "faint", free: true }));
+    out.push(k.dotsSvg([at([sx, sy, 9]), at([endX, endY, 9])], { size: 1, tone: "lo" }));
   }
   for (const axis of [-1, 1]) {
     out.push(line3([[axis * 18, -75, 8.8], [axis * 18, -27, 8.8]], { tone: "lo", free: true }));
@@ -140,13 +153,17 @@ function centralCore() {
 
 function edgeHardware() {
   const out = [];
-  for (const x of [-80, -48, -16, 16, 48, 80]) {
-    out.push(slab({ x: x - 6, y: 88, w: 12, d: 6, r: 1 }, 8, 6, { tone: "lo", className: "part edge-port" }));
-    out.push(line3([[x - 3, 94, 11], [x + 3, 94, 11]], { tone: "faint" }));
+  for (let index = 0; index < 12; index++) {
+    const angle = index * Math.PI / 6;
+    const x = Math.cos(angle) * 104;
+    const y = Math.sin(angle) * 104;
+    out.push(cyl(x, y, 3.4, 8, 4, { tone: "lo", className: "part edge-port" }));
+    out.push(cyl(x, y, 1.3, 12, .8, { tone: "mid", className: "part contact" }));
   }
-  for (const x of [-88, -74, 74, 88]) out.push(cyl(x, -87, 2.3, 8, 3, { tone: "mid", className: "part fuse" }));
-  out.push(slab({ x: -116, y: -4, w: 10, d: 36, r: 2 }, 8, 7, { tone: "lo", className: "part power-rail" }));
-  out.push(slab({ x: 106, y: -4, w: 10, d: 36, r: 2 }, 8, 7, { tone: "lo", className: "part power-rail" }));
+  for (const angle of [-22, 22, 158, 202]) {
+    const rad = angle * Math.PI / 180;
+    out.push(cyl(Math.cos(rad) * 88, Math.sin(rad) * 88, 2.4, 8, 4, { tone: "mid", className: "part fuse" }));
+  }
   return out.join("");
 }
 
@@ -165,5 +182,5 @@ svg{display:block;width:100%;height:100%;overflow:visible}.iso-fill{fill:var(--a
 </style>`;
 
 mkdirSync(join(ROOT, "assets"), { recursive: true });
-writeFileSync(join(ROOT, "assets", "ohmium-circuit-core.svg"), svg.replace(/<svg /, `<svg data-parts="155" `).replace(">", `>${style}`));
-console.log("wrote assets/ohmium-circuit-core.svg · 155 modeled parts");
+writeFileSync(join(ROOT, "assets", "ohmium-circuit-core.svg"), svg.replace(/<svg /, `<svg data-parts="179" `).replace(">", `>${style}`));
+console.log("wrote assets/ohmium-circuit-core.svg · 179 modeled parts");
