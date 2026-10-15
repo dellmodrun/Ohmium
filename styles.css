@@ -183,3 +183,12 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 /* Header mark spacing: keep the complete component visible with measured breathing room. */
 @media(min-width:1051px){.topbar{grid-template-columns:78px minmax(0,1fr) auto!important}.brand{justify-content:center!important;padding:0 12px!important}.brand-logo{width:52px!important;height:34px!important;flex-basis:52px!important}.brand-logo img{width:67px!important;height:67px!important}}
 @media(max-width:1050px){.brand-logo{width:46px!important;height:32px!important;flex-basis:46px!important}.brand-logo img{width:63px!important;height:63px!important}}
+
+/* Reserved home telemetry area: four intentionally empty data panels. */
+.home-data-grid{grid-column:1/-1;display:grid;min-width:0;height:330px;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;padding:1px 0 0;background:#202c23}
+.home-data-slot{position:relative;min-width:0;background:#000}
+.home-data-slot:before,.home-data-slot:after{content:"";position:absolute;width:9px;height:9px;border-color:#263b2b;border-style:solid;pointer-events:none}
+.home-data-slot:before{top:12px;left:12px;border-width:1px 0 0 1px}
+.home-data-slot:after{right:12px;bottom:12px;border-width:0 1px 1px 0}
+@media(max-width:1050px){.home-data-grid{height:auto;min-height:520px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(260px,1fr))}}
+@media(max-width:680px){.home-data-grid{grid-template-columns:1fr;grid-template-rows:repeat(4,260px)}}
