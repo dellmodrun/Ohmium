@@ -17,5 +17,7 @@ const indexPath = resolve(output, "index.html");
 const index = readFileSync(indexPath, "utf8").replace('meta name="ohmium-api-base" content=""', `meta name="ohmium-api-base" content="${apiOrigin}"`);
 writeFileSync(indexPath, index);
 writeFileSync(resolve(output, ".nojekyll"), "");
+writeFileSync(resolve(output, "CNAME"), "ohmium.fun\n");
 console.log(`Pages bundle: ${output}`);
 console.log(`API origin: ${apiOrigin || "NOT CONFIGURED"}`);
+console.log("Custom domain: ohmium.fun");

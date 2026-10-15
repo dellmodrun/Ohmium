@@ -8,7 +8,7 @@ tags:
 
 # Ohmium
 
-[Live network](https://ohmium.167-99-74-236.sslip.io/) · [X](https://x.com/ohmiumacc) · [Hugging Face source mirror](https://huggingface.co/tardumo/Ohmium)
+[Live network](https://ohmium.fun/) · [X](https://x.com/ohmiumacc) · [Hugging Face source mirror](https://huggingface.co/tardumo/Ohmium)
 
 ![Release pipeline](https://img.shields.io/github/actions/workflow/status/nuttumrunit/Ohmium/pages.yml?branch=main&label=release&style=flat-square)
 ![Node.js 20+](https://img.shields.io/badge/Node.js-%3E%3D20-7fe03a?style=flat-square&logo=nodedotjs&logoColor=white)
@@ -110,7 +110,8 @@ For production use, place the Core behind an HTTPS reverse proxy, provide high-e
 
 The production stack is served from one private release pipeline:
 
-- `https://ohmium.167-99-74-236.sslip.io` serves the frontend and Core API through the existing Caddy edge.
+- `https://ohmium.fun` serves the public frontend through GitHub Pages.
+- `https://ohmium.167-99-74-236.sslip.io` serves the Core API and event stream through the existing Caddy edge.
 - `/opt/ohmium/data/core` persists registry, task, mutation and lineage state.
 - `/opt/ohmium/data/worker` persists the production worker identity and one-time bearer secret.
 - `/opt/ohmium/data/runs` is the host-visible sandbox workspace used by Docker replay jobs.

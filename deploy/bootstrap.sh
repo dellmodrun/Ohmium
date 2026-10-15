@@ -12,8 +12,16 @@ if [ ! -f .env.production ]; then
   printf '%s\n' \
     "OHMIUM_ADMIN_TOKEN=$(openssl rand -hex 32)" \
     "OHMIUM_REGISTRATION_KEY=$(openssl rand -hex 32)" \
-    "OHMIUM_ALLOWED_ORIGIN=https://nuttumrunit.github.io" \
+    "OHMIUM_ALLOWED_ORIGIN=https://ohmium.fun" \
     "DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)" > .env.production
+fi
+
+# The public frontend is served from the custom GitHub Pages domain. Keep the
+# persisted production configuration aligned across later code deployments.
+if grep -q '^OHMIUM_ALLOWED_ORIGIN=' .env.production; then
+  sed -i 's|^OHMIUM_ALLOWED_ORIGIN=.*$|OHMIUM_ALLOWED_ORIGIN=https://ohmium.fun|' .env.production
+else
+  printf '%s\n' 'OHMIUM_ALLOWED_ORIGIN=https://ohmium.fun' >> .env.production
 fi
 
 if ! docker network inspect cennomo_default >/dev/null 2>&1; then
