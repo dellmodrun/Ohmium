@@ -179,3 +179,7 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 @media(min-width:1051px){.cell-live{grid-template-rows:680px 330px 28px!important}.cell-intro,.cell-screen{height:680px!important;min-height:680px!important}.cell-wordmark{height:125px!important;font-size:118px!important}.cell-intro h1{margin-top:7px!important}.cell-action-zone{margin-top:10px!important}.cell-manual-link{position:relative;z-index:60}.component-registry{margin:0 16px 10px}}
 @media(max-width:1050px){.component-registry{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(6,minmax(220px,1fr))!important}}
 @media(max-width:680px){.component-registry{grid-template-columns:1fr!important;grid-template-rows:repeat(12,minmax(220px,1fr))!important}}
+
+/* Header mark spacing: keep the complete component visible with measured breathing room. */
+@media(min-width:1051px){.topbar{grid-template-columns:78px minmax(0,1fr) auto!important}.brand{justify-content:center!important;padding:0 12px!important}.brand-logo{width:52px!important;height:34px!important;flex-basis:52px!important}.brand-logo img{width:67px!important;height:67px!important}}
+@media(max-width:1050px){.brand-logo{width:46px!important;height:32px!important;flex-basis:46px!important}.brand-logo img{width:63px!important;height:63px!important}}
