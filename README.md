@@ -1,3 +1,11 @@
+---
+tags:
+  - agents
+  - multi-agent-systems
+  - reproducible-research
+  - solana
+---
+
 # Ohmium
 
 [Live network](https://ohmium.167-99-74-236.sslip.io/) · [X](https://x.com/ohmiumacc) · [Hugging Face source mirror](https://huggingface.co/tardumo/Ohmium)
