@@ -5,6 +5,8 @@
   const title = mount.querySelector("[data-core-title]");
   const detail = mount.querySelector("[data-core-detail]");
   const count = mount.querySelector("[data-core-count]");
+  const networkState = mount.querySelector("[data-core-network-state]");
+  const inspect = mount.querySelector("[data-core-inspect]");
   const states = {
     core: ["Conductor core", "Coordinates verified signals across the component circuit."],
     sensor: ["Sense / 01", "Observes an approved source and converts it into a bounded signal."],
@@ -17,7 +19,7 @@
     verify: ["Verify / 08", "Checks output evidence before the shared model can accept it."],
   };
 
-  fetch("./assets/ohmium-circuit-core.svg?v=3")
+  fetch("./assets/ohmium-circuit-core.svg?v=4")
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();
@@ -27,18 +29,45 @@
       slot.innerHTML = markup;
       const modeledParts = slot.querySelectorAll(".part").length;
       count.textContent = `${modeledParts} parts`;
+      let inspection = 0;
+      const clear = () => slot.querySelectorAll(".is-active").forEach((item) => item.classList.remove("is-active"));
+      const activate = (key, mode = "inspect") => {
+        clear();
+        slot.querySelector(`[data-component="${key}"]`)?.classList.add("is-active");
+        slot.querySelector(`.route-${key}`)?.classList.add("is-active");
+        title.textContent = states[key][0];
+        detail.textContent = states[key][1];
+        networkState.textContent = mode === "event" ? "Processing verified event" : "Local route inspection";
+      };
       slot.querySelectorAll("[data-component]").forEach((node) => {
-        const activate = () => {
-          const key = node.dataset.component;
-          slot.querySelectorAll(".is-active").forEach((item) => item.classList.remove("is-active"));
-          node.classList.add("is-active");
-          slot.querySelector(`.route-${key}`)?.classList.add("is-active");
-          title.textContent = states[key][0];
-          detail.textContent = states[key][1];
-        };
-        node.addEventListener("pointerenter", activate);
-        node.addEventListener("focus", activate);
-        node.addEventListener("click", activate);
+        const inspectNode = () => activate(node.dataset.component);
+        node.addEventListener("pointerenter", inspectNode);
+        node.addEventListener("focus", inspectNode);
+        node.addEventListener("click", inspectNode);
+      });
+      inspect.addEventListener("click", async () => {
+        if (inspection) return;
+        const run = ++inspection;
+        inspect.disabled = true;
+        inspect.textContent = "Inspecting 0 / 8";
+        const route = ["sensor", "filter", "oracle", "guard", "router", "memory", "archive", "verify", "core"];
+        for (let index = 0; index < route.length && run === inspection; index++) {
+          activate(route[index]);
+          inspect.textContent = index < 8 ? `Inspecting ${index + 1} / 8` : "Route verified";
+          await new Promise((resolve) => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 80 : 520));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        clear();
+        title.textContent = "Conductor topology";
+        detail.textContent = "Inspect a component to trace its role in the circuit.";
+        networkState.textContent = "Awaiting first verified signal";
+        inspect.textContent = "Inspect signal route";
+        inspect.disabled = false;
+        inspection = 0;
+      });
+      window.addEventListener("ohmium:signal", (event) => {
+        const key = event.detail?.component;
+        if (states[key]) activate(key, "event");
       });
     })
     .catch(() => {

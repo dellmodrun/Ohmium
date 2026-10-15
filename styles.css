@@ -430,5 +430,12 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .ohmium-core-state i{grid-row:1/3;width:5px;height:5px;border:1px solid var(--acid);background:#000}
 .ohmium-core-state span{color:#647168;letter-spacing:.08em;text-transform:uppercase}
 .ohmium-core-state b{margin-top:3px;color:#a8b3ab;font-weight:400}
+.ohmium-core-inspect{position:absolute;top:17px;right:18px;z-index:4;height:31px;padding:0 11px;border:1px solid #2b3b30;color:#8d9a91;background:rgba(0,0,0,.82);font:7px var(--mono);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.ohmium-core-inspect:hover{color:#000;border-color:var(--acid);background:var(--acid)}
+.ohmium-core-inspect:disabled{color:#65736a;border-color:#34483a;background:#050805;cursor:wait}
+.component-station{transform-box:fill-box;transform-origin:center;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .2s ease}
+.component-station.is-active{transform:translateY(-6px)}
+.central-core{transform-box:fill-box;transform-origin:center;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.central-core.is-active{transform:translateY(-4px)}
 @media(max-width:1050px){.ohmium-core-figure{inset:24px 18px 86px}.ohmium-core-readout{grid-template-columns:90px 150px 1fr}}
-@media(max-width:680px){.ohmium-core-figure{inset:48px -18px 88px}.ohmium-core-readout{right:12px;bottom:12px;left:12px;grid-template-columns:82px 1fr}.ohmium-core-readout>p{display:none}.ohmium-core-state{top:12px;left:12px}}
+@media(max-width:680px){.ohmium-core-figure{inset:48px -18px 88px}.ohmium-core-readout{right:12px;bottom:12px;left:12px;grid-template-columns:82px 1fr}.ohmium-core-readout>p{display:none}.ohmium-core-state{top:12px;left:12px}.ohmium-core-inspect{top:12px;right:12px}}
