@@ -386,3 +386,22 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .cell-ca{width:100%;max-width:736px!important}
 .cell-action-zone{min-height:70px!important;margin-top:18px!important}
 @media(max-width:1050px){.cell-intro-body{display:block;padding-top:34px!important;padding-bottom:34px!important}}
+
+/* Technical editorial treatment for the primary home module. */
+.cell-system-line{display:flex;width:100%;max-width:736px;height:28px;align-items:flex-start;justify-content:space-between;color:#718078;border-bottom:1px solid #243329;font-size:7px;letter-spacing:.06em}
+.cell-system-line b{color:#98a49c;font-weight:500;letter-spacing:.04em}
+.cell-wordmark{height:110px!important;font-size:106px!important;letter-spacing:-.055em!important}
+.cell-intro h1{position:relative;margin:8px 0 12px!important;padding-left:15px;color:#f1f5f2!important;border-left:1px solid var(--acid);font-size:15px!important;line-height:1.48!important;letter-spacing:-.02em!important}
+.cell-intro h1 i{display:none!important}
+.cell-intro-body>p{max-width:710px!important;margin:0 0 20px!important;color:#7e8b83!important;font-size:9px!important;line-height:1.72!important}
+.cell-ca{height:42px!important;grid-template-columns:124px minmax(0,1fr) 58px!important;border-color:#2a3a2f!important;background:#010302!important}
+.cell-ca span{color:#98a49c!important;font-size:8px!important}
+.cell-ca code{padding-left:14px;color:#e6ece8!important;border-left:1px solid #243329;font-size:9px!important;letter-spacing:.06em}
+.cell-ca button{padding:0!important;color:#aeb9b2!important;font-size:8px!important}
+.cell-ca button:hover{color:#000!important;background:var(--acid)!important}
+.cell-action-zone{margin-top:16px!important}
+.cell-action-zone .cell-actions{gap:8px!important}
+.cell-action-zone .cell-actions a{min-width:174px!important;height:42px!important;padding:0 18px!important;font-size:10px!important;font-weight:500!important}
+.cell-action-zone .cell-manual-link{color:#75837a!important;font-size:9px!important}
+.cell-action-zone .cell-manual-link:hover{color:#dfe7e2!important}
+@media(max-width:680px){.cell-system-line{max-width:none}.cell-wordmark{height:auto!important;font-size:clamp(64px,20vw,92px)!important}.cell-ca{grid-template-columns:105px minmax(0,1fr) 54px!important}.cell-action-zone .cell-actions a{min-width:0!important;flex:1}}
