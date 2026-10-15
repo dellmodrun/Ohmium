@@ -17,7 +17,7 @@ const economicPolicy = Object.freeze({
   schema: "ohmium.economics.v1",
   network: "solana",
   symbol: "OHMIUM",
-  mint: null,
+  mint: "7caVjXoq1bDwkzEAYzk5Y79BBiQnuwHY1LwZJhmipump",
   treasuryAddress: null,
   agentActivation: { burnTokens: 10000, permanent: true, enabled: false, proofRequired: true },
   creatorRewards: {
