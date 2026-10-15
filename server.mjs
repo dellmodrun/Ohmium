@@ -13,6 +13,8 @@ const registrationKey = process.env.OHMIUM_REGISTRATION_KEY || "";
 const allowedOrigin = process.env.OHMIUM_ALLOWED_ORIGIN || "";
 const clients = new Set(), rate = new Map(), metrics = { startedAt: Date.now(), requests: 0 };
 const officialCatalog = JSON.parse(readFileSync(resolve(root, "official-agents.json"), "utf8"));
+const rackSource = "https://isoglow.dev/demo/gallery/3d.html?embed&theme=dark";
+let rackDocument = null, rackFetchedAt = 0;
 
 const emptyState = () => ({ version: 4, createdAt: new Date().toISOString(), tasks: [], machines: [], mutations: [], lineage: [], events: [], treasury: { network: "solana", initialized: false, address: null, balanceSol: null, updatedAt: null } });
 mkdirSync(dataDir, { recursive: true });
@@ -57,6 +59,19 @@ function staticFile(response, pathname) {
   return true;
 }
 
+async function embeddedRack(response) {
+  if (!rackDocument || Date.now() - rackFetchedAt > 600000) {
+    const upstream = await fetch(rackSource, { signal: AbortSignal.timeout(15000), headers: { "user-agent": "Ohmium/1.0 model relay" } });
+    if (!upstream.ok) throw new Error(`rack source returned ${upstream.status}`);
+    const source = await upstream.text();
+    rackDocument = source.replace("<head>", '<head><base href="https://isoglow.dev/demo/gallery/">');
+    rackFetchedAt = Date.now();
+  }
+  response.setHeader("x-frame-options", "SAMEORIGIN");
+  response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300", "x-content-type-options": "nosniff" });
+  response.end(rackDocument);
+}
+
 function repositories() {
   const urls = [...state.tasks.map((item) => item.repository), ...state.machines.map((item) => item.repository)].filter(Boolean);
   return [...new Set(urls)].map((repository) => ({ repository, source: "registered-runtime", observedAt: now() }));
@@ -73,6 +88,7 @@ const server = http.createServer(async (request, response) => {
   response.setHeader("referrer-policy", "no-referrer");
   try {
     if (!withinLimit(request)) return json(response, 429, { error: "rate limit exceeded" });
+    if (request.method === "GET" && path === "/embed/isoglow-rk") return embeddedRack(response);
     if (request.method === "GET" && path === "/api/health") return json(response, 200, { ok: true, service: "ohmium-core", version: state.version, time: now(), uptimeSec: Math.floor(process.uptime()) });
     if (request.method === "GET" && path === "/api/agents") return json(response, 200, { schema: officialCatalog.schema, label: officialCatalog.label, agents: officialAgents() });
     if (request.method === "GET" && (path === "/api/sources" || path === "/api/github-stream")) return json(response, 200, { at: now(), sources: repositories(), channels: [] });
