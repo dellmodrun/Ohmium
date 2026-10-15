@@ -1,9 +1,12 @@
 (() => {
+  if (window.__ohmiumHomeMonitorMounted) return;
+  window.__ohmiumHomeMonitorMounted = true;
   const one = (selector) => document.querySelector(selector);
   const all = (selector) => [...document.querySelectorAll(selector)];
   const set = (selector, value) => { all(selector).forEach((node) => { node.textContent = value; }); };
   const short = (value, size = 7) => value ? `${String(value).slice(0, size)}…${String(value).slice(-4)}` : "—";
   const clock = (value) => value ? new Date(value).toLocaleTimeString([], { hour12: false }) : "—";
+  const duration = (seconds = 0) => { const value = Math.max(0, Number(seconds) || 0), hours = Math.floor(value / 3600), minutes = Math.floor((value % 3600) / 60); return hours ? `${hours}h ${minutes}m` : `${minutes}m ${Math.floor(value % 60)}s`; };
   const stages = ["sensor", "filter", "oracle", "guard", "router", "memory", "archive", "verify"];
 
   function clearTrace() {
@@ -44,6 +47,12 @@
     set("[data-network-components]", "—");
     set("[data-network-treasury]", "—");
     set("[data-network-foot]", reason);
+    set("[data-core-mode]", "OFFLINE");
+    set("[data-core-uptime]", "—");
+    set("[data-core-memory]", "—");
+    set("[data-core-requests]", "—");
+    set("[data-core-clients]", "—");
+    set("[data-core-events]", "—");
     set("[data-proof-mode]", "EMPTY");
     set("[data-proof-id]", "Proof —");
     set("[data-proof-hash]", "Hash —");
@@ -67,6 +76,12 @@
     set("[data-network-components]", String(onlineMachines.length));
     set("[data-network-treasury]", state.treasury?.initialized && state.treasury.balanceSol != null ? `${state.treasury.balanceSol} SOL` : "—");
     set("[data-network-foot]", `Core verified · ${clock(telemetry.at)}`);
+    set("[data-core-mode]", "CONNECTED");
+    set("[data-core-uptime]", duration(telemetry.uptimeSec));
+    set("[data-core-memory]", `${telemetry.rssMb} MB`);
+    set("[data-core-requests]", String(telemetry.requests));
+    set("[data-core-clients]", String(telemetry.sseClients));
+    set("[data-core-events]", String(telemetry.events));
     set(".cell-status em", `Core online · ${onlineMachines.length} active · ${clock(telemetry.at)}`);
 
     const proof = state.lineage?.at?.(-1);
