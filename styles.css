@@ -249,3 +249,31 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 @media(min-width:1051px){.topbar{grid-template-columns:72px minmax(470px,1fr) auto!important}.brand{padding:0 13px!important}}
 @media(max-width:1240px) and (min-width:1051px){.topbar nav a{padding:0 10px!important;font-size:9px}.header-actions .deploy-link{display:none}.header-actions>button{min-width:108px;padding-inline:10px!important}.header-actions .buy-cell{min-width:98px;padding-inline:10px!important}}
 @media(max-width:1050px){.topbar{grid-template-columns:72px minmax(0,1fr)!important}.brand{justify-content:center!important;padding:0 12px!important}.brand>span:last-child{display:none}.header-actions{display:none}.topbar nav{overflow-x:auto;scrollbar-width:none}.topbar nav::-webkit-scrollbar{display:none}.topbar nav a{flex:1 0 84px!important}}
+
+/* Navigation revision 02: calmer hierarchy, fewer controls, more air. */
+.topbar{height:60px!important;grid-template-columns:84px minmax(0,1fr) auto!important;border-bottom:1px solid #223027!important}
+.brand{height:60px!important;justify-content:center!important;padding:0!important;border-right:1px solid #223027!important}
+.brand>.brand-logo{display:block!important;width:56px!important;height:42px!important;flex-basis:56px!important;background:url("./assets/ohmium-logo-transparent.png?v=8") center/50px 50px no-repeat!important}
+.brand-logo img{width:50px!important;height:50px!important;opacity:0!important}
+.topbar nav{height:60px;align-items:stretch;padding-left:14px;gap:2px}
+.topbar nav a{min-width:auto!important;padding:0 16px!important;border:0!important;color:#8d9991!important;font-size:10px!important;letter-spacing:.01em;text-transform:none;background:#000!important}
+.topbar nav a:before{display:none!important}
+.topbar nav a:after{content:"";position:absolute;right:16px;bottom:0;left:16px;height:1px;background:transparent;box-shadow:none!important}
+.topbar nav a:hover{color:#e4ebe7!important;background:#020503!important}
+.topbar nav a.active{color:#eef4f0!important;background:#000!important}
+.topbar nav a.active:after{background:var(--acid)!important;box-shadow:0 -3px 12px rgba(127,224,58,.28)!important}
+.header-actions{height:60px;border-left:0!important}
+.header-actions .ca{min-width:86px!important;padding:0 16px!important;gap:9px;border-left:1px solid #223027!important}
+.header-actions .ca small{font-size:6px}.header-actions .ca b{font-size:9px;color:#d0d9d3}
+.social-cluster{height:60px;border-color:#223027!important}
+.header-actions .social-icon{width:48px!important;border-color:#223027!important}
+.social-icon svg{width:14px;height:14px}
+.social-hf img{display:block;width:21px;height:21px;object-fit:contain;filter:none}
+.header-actions .social-hf:hover img{filter:drop-shadow(0 0 5px rgba(255,210,30,.32))}
+.header-actions>button{min-width:136px;height:60px;gap:10px;padding:0 18px!important;border-left:0!important;background:#000!important}
+.header-actions>button>i{width:15px;height:12px;border-color:#8a978f}
+.header-actions>button>span{font-size:9px;text-transform:none}
+.header-actions .buy-cell{min-width:126px;height:60px;padding:0 18px!important;font-size:9px;text-transform:none}
+@media(min-width:1051px){body[data-route="live"]{height:100dvh}.cell-live{height:calc(100dvh - 60px)!important}}
+@media(max-width:1260px) and (min-width:1051px){.topbar nav{padding-left:6px}.topbar nav a{padding-inline:10px!important}.topbar nav a:after{right:10px;left:10px}.header-actions .ca{min-width:72px!important;padding-inline:11px!important}.header-actions .social-icon{width:42px!important}.header-actions>button{min-width:116px;padding-inline:12px!important}.header-actions .buy-cell{min-width:108px;padding-inline:12px!important}}
+@media(max-width:1050px){.topbar{grid-template-columns:78px minmax(0,1fr)!important}.brand{height:60px!important}.topbar nav{height:60px;padding-left:4px;overflow-x:auto;scrollbar-width:none}.topbar nav a{flex:1 0 88px!important}.header-actions{display:none}}
