@@ -2,14 +2,19 @@
   const one = (selector, root = document) => root.querySelector(selector);
   const all = (selector, root = document) => [...root.querySelectorAll(selector)];
   const state = { wallet: null };
+  const viewForRoute = { home: "home", live: "live", source: "mutations", circuit: "lineage", treasury: "treasury", deploy: "spawn", protocol: "manual", mutations: "mutations", lineage: "lineage", spawn: "spawn", manual: "manual" };
+  const routeForView = { home: "home", live: "live", mutations: "source", lineage: "circuit", treasury: "treasury", spawn: "deploy", manual: "protocol" };
 
   function route(name) {
-    const next = one(`[data-view="${name}"]`) ? name : "home";
+    const requested = String(name || "home").toLowerCase();
+    const next = viewForRoute[requested] && one(`[data-view="${viewForRoute[requested]}"]`) ? viewForRoute[requested] : "home";
+    const canonical = routeForView[next];
+    if (location.hash !== `#${canonical}`) history.replaceState(null, "", `#${canonical}`);
     all(".app-view").forEach((view) => view.classList.toggle("is-active", view.dataset.view === next));
-    all("[data-route]").forEach((link) => link.classList.toggle("active", link.dataset.route === next));
+    all("[data-route]").forEach((link) => link.classList.toggle("active", link.dataset.route === canonical));
     const detail = one("#landingDetail");
     if (detail) detail.hidden = next !== "home";
-    document.body.dataset.route = next;
+    document.body.dataset.route = canonical;
     scrollTo(0, 0);
   }
 

@@ -37,12 +37,12 @@ jobs:
         env:
           SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
         run: |
+          tar --exclude=.git --exclude=node_modules --exclude=dist-pages --exclude=data --exclude=.env -czf /tmp/ohmium-release.tgz .
+          scp -i ~/.ssh/ohmium /tmp/ohmium-release.tgz root@"$SERVER_HOST":/tmp/ohmium-release.tgz
           ssh -i ~/.ssh/ohmium root@"$SERVER_HOST" 'set -eu
-            if [ ! -d /opt/ohmium/.git ]; then
-              git clone https://github.com/nuttumrunit/Ohmium.git /opt/ohmium
-            else
-              git -C /opt/ohmium pull --ff-only origin main
-            fi
+            install -d /opt/ohmium
+            tar -xzf /tmp/ohmium-release.tgz -C /opt/ohmium
+            rm -f /tmp/ohmium-release.tgz
             cd /opt/ohmium
             sh deploy/bootstrap.sh
             sh deploy/install-caddy-route.sh'

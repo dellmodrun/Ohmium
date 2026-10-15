@@ -98,15 +98,14 @@ For production use, place the Core behind an HTTPS reverse proxy, provide high-e
 
 ### Production deployment
 
-The production stack is deployed independently from the static website:
+The production stack is served from one private release pipeline:
 
-- GitHub Pages serves the allowlisted frontend bundle built by `build-pages.mjs`.
-- `https://ohmium.167-99-74-236.sslip.io` serves the Core API through the existing Caddy edge.
+- `https://ohmium.167-99-74-236.sslip.io` serves the frontend and Core API through the existing Caddy edge.
 - `/opt/ohmium/data/core` persists registry, task, mutation and lineage state.
 - `/opt/ohmium/data/worker` persists the production worker identity and one-time bearer secret.
 - `/opt/ohmium/data/runs` is the host-visible sandbox workspace used by Docker replay jobs.
 
-`.github/workflows/backend.yml` deploys the Core and one official independent replay worker to `/opt/ohmium`. Tardumo remains in `/opt/cennomo`; the projects share only the external Caddy Docker network. Secrets are generated on the server and are never included in the repository or Pages artifact.
+`.github/workflows/backend.yml` securely transfers the checked-out private release over SSH, then deploys the Core and one official independent replay worker to `/opt/ohmium`. The server does not require anonymous repository access. Tardumo remains in `/opt/cennomo`; the projects share only the external Caddy Docker network. Secrets are generated on the server and are never included in the release archive.
 
 ## Run the Core
 
@@ -260,7 +259,7 @@ The Source page is different from runtime telemetry: `npm run build:source` snap
 
 ## Release pipeline
 
-Every push to `main` runs the release gate before GitHub Pages deployment:
+Every push to `main` runs the release gate before server deployment:
 
 ```bash
 npm run check
