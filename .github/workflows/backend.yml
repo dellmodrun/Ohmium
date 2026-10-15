@@ -37,6 +37,7 @@ jobs:
         env:
           SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
         run: |
+          printf '%s\n' "$GITHUB_SHA" > .release-commit
           tar --exclude=.git --exclude=node_modules --exclude=dist-pages --exclude=data --exclude=.env -czf /tmp/ohmium-release.tgz .
           scp -i ~/.ssh/ohmium /tmp/ohmium-release.tgz root@"$SERVER_HOST":/tmp/ohmium-release.tgz
           ssh -i ~/.ssh/ohmium root@"$SERVER_HOST" 'set -eu

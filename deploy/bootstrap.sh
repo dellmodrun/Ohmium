@@ -23,5 +23,5 @@ fi
 
 docker compose --env-file .env.production -f docker-compose.production.yml up -d --build --remove-orphans
 docker compose --env-file .env.production -f docker-compose.production.yml ps
-release_commit="$(git rev-parse HEAD)"
+release_commit="$(cat .release-commit 2>/dev/null || git rev-parse HEAD 2>/dev/null || printf local)"
 docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm -e "OHMIUM_RELEASE_COMMIT=${release_commit}" genesis
