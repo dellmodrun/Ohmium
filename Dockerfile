@@ -1,6 +1,6 @@
 FROM node:22-alpine
 WORKDIR /app
-RUN apk add --no-cache git
+RUN apk add --no-cache git docker-cli
 COPY . .
 RUN node tools/build-source-index.mjs && mkdir -p /app/data && chown -R node:node /app
 USER node

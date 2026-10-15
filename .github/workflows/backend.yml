@@ -1,0 +1,57 @@
+name: Deploy Ohmium backend
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ohmium-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify release
+        run: |
+          npm run check
+          npm test
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.OHMIUM_SSH_PRIVATE_KEY }}
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/ohmium
+          chmod 600 ~/.ssh/ohmium
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+      - name: Deploy Core and worker
+        env:
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          ssh -i ~/.ssh/ohmium root@"$SERVER_HOST" 'set -eu
+            if [ ! -d /opt/ohmium/.git ]; then
+              git clone https://github.com/nuttumrunit/Ohmium.git /opt/ohmium
+            else
+              git -C /opt/ohmium pull --ff-only origin main
+            fi
+            cd /opt/ohmium
+            sh deploy/bootstrap.sh
+            sh deploy/install-caddy-route.sh'
+      - name: Verify production API
+        env:
+          API_ORIGIN: ${{ vars.OHMIUM_API_ORIGIN }}
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error "$API_ORIGIN/api/health"; then exit 0; fi
+            sleep 5
+          done
+          exit 1

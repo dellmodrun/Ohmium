@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
-const args = process.argv.slice(2), commandName = args.shift(), configPath = resolve(".ohmium-worker.json");
+const args = process.argv.slice(2), commandName = args.shift(), configPath = resolve(process.env.OHMIUM_WORKER_CONFIG || ".ohmium-worker.json");
 const option = (name) => { const index = args.indexOf(`--${name}`); return index >= 0 ? args[index + 1] : undefined; };
 const server = option("server") || "http://127.0.0.1:4210";
 const config = existsSync(configPath) ? JSON.parse(readFileSync(configPath, "utf8")) : null;
@@ -50,7 +50,9 @@ function parseMetric(stdout) {
 }
 
 async function sandbox(task, patch) {
-  const work = mkdtempSync(join(tmpdir(), "ohmium-run-")), source = join(work, "source"), patchFile = join(work, "mutation.patch");
+  const runRoot = resolve(process.env.OHMIUM_RUN_ROOT || tmpdir());
+  mkdirSync(runRoot, { recursive: true });
+  const work = mkdtempSync(join(runRoot, "ohmium-run-")), source = join(work, "source"), patchFile = join(work, "mutation.patch");
   try {
     await run("git", ["clone", "--quiet", "--no-checkout", "--filter=blob:none", task.repository, source], { timeout: 300000 });
     await run("git", ["-C", source, "checkout", "--quiet", task.baseCommit], { timeout: 120000 });

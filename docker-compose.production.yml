@@ -1,0 +1,52 @@
+services:
+  ohmium:
+    container_name: ohmium-core
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4210
+      OHMIUM_DATA_DIR: /app/data
+    volumes:
+      - ./data/core:/app/data
+    networks:
+      - tardumo
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4210/api/health"]
+      interval: 20s
+      timeout: 4s
+      retries: 4
+
+  worker:
+    container_name: ohmium-worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ohmium:
+        condition: service_healthy
+    env_file: .env.production
+    environment:
+      OHMIUM_API_URL: http://ohmium:4210
+      OHMIUM_WORKER_NAME: ohm-verify
+      OHMIUM_WORKER_CONFIG: /opt/ohmium/data/worker/config.json
+      OHMIUM_RUN_ROOT: /opt/ohmium/data/runs
+      OHMIUM_ACTIVITY: independent replay worker; polling verification queue
+    command: ["sh", "-c", "node /app/deploy/register-worker.mjs && node /app/worker.mjs start --auto --server http://ohmium:4210"]
+    volumes:
+      - ./data/worker:/opt/ohmium/data/worker
+      - ./data/runs:/opt/ohmium/data/runs
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID}"
+    networks:
+      - tardumo
+
+networks:
+  tardumo:
+    external: true
+    name: cennomo_default

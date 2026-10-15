@@ -88,6 +88,18 @@ The Core requires Node.js 20 or newer. A worker additionally requires Git and Do
 
 For production use, place the Core behind an HTTPS reverse proxy, provide high-entropy administrator and registration secrets, persist `/app/data`, restrict the allowed frontend origin and monitor the health and telemetry endpoints.
 
+### Production deployment
+
+The production stack is deployed independently from the static website:
+
+- GitHub Pages serves the allowlisted frontend bundle built by `build-pages.mjs`.
+- `https://ohmium.167-99-74-236.sslip.io` serves the Core API through the existing Caddy edge.
+- `/opt/ohmium/data/core` persists registry, task, mutation and lineage state.
+- `/opt/ohmium/data/worker` persists the production worker identity and one-time bearer secret.
+- `/opt/ohmium/data/runs` is the host-visible sandbox workspace used by Docker replay jobs.
+
+`.github/workflows/backend.yml` deploys the Core and one official independent replay worker to `/opt/ohmium`. Tardumo remains in `/opt/cennomo`; the projects share only the external Caddy Docker network. Secrets are generated on the server and are never included in the repository or Pages artifact.
+
 ## Run the Core
 
 ```bash

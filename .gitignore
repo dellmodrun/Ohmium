@@ -2,7 +2,9 @@ data/state.json
 data/state.json.tmp
 .ohmium-worker.json
 .env
+.env.production
 agents/*/.ohmium-worker.json
 agents/*/agent.log
 agents/pids.json
 source-index.json
+dist-pages/
