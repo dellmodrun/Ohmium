@@ -39,7 +39,7 @@ function withinLimit(request) { const key = request.socket.remoteAddress || "unk
 
 function staticFile(response, pathname) {
   const requested = pathname === "/" ? "index.html" : pathname.slice(1);
-  const files = new Set(["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "network-pages.js", "ohmium-core.js"]);
+  const files = new Set(["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "repository-browser.js", "network-pages.js", "ohmium-core.js"]);
   if (!files.has(requested) && !requested.startsWith("assets/")) return false;
   const file = resolve(root, normalize(requested)), rel = relative(root, file);
   if (rel.startsWith("..") || isAbsolute(rel) || !existsSync(file)) return false;

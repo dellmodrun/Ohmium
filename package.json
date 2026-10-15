@@ -7,7 +7,7 @@
                     "build:figure": "node tools/build-ohmium-silicon.mjs",
                     "start":  "node server.mjs",
                     "worker":  "node worker.mjs",
-                    "check":  "node --check server.mjs && node --check worker.mjs && node --check data-client.js && node --check app.js && node --check home-monitor.js && node --check network-pages.js && node --check ohmium-core.js",
+                    "check":  "node --check server.mjs && node --check worker.mjs && node --check data-client.js && node --check app.js && node --check home-monitor.js && node --check repository-browser.js && node --check network-pages.js && node --check ohmium-core.js",
                     "test":  "node test.mjs"
                 },
     "engines":  {

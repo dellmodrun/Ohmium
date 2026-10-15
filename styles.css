@@ -462,6 +462,38 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 body[data-signal="empty"] .particle-field path,body[data-signal="empty"] .field-bars{display:none}
 body[data-signal="empty"] .particle-field:after{content:"NO ROUTED PACKET";position:absolute;inset:0;display:grid;place-items:center;color:#435047;font:500 7px var(--mono);letter-spacing:.12em}
 body[data-signal="empty"] .index-cells i{background:transparent!important;opacity:1!important}
+
+/* Repository workspace and command-bar removal */
+.work-command{display:none!important}
+.machine-workstation{height:calc(100dvh - 54px)!important;min-height:660px!important;overflow:hidden!important}
+.machine-workstation.is-active{display:grid!important;grid-template-rows:minmax(0,1fr) 28px!important}
+.repository-browser{display:grid;min-width:0;min-height:0;grid-template-columns:minmax(320px,38%) minmax(0,62%);border-bottom:1px solid #202c23;background:#000}
+.repository-sidebar{display:grid;min-width:0;min-height:0;grid-template-rows:auto 34px minmax(170px,1fr) minmax(230px,.9fr);border-right:1px solid #202c23;background:#000}
+.repository-identity{padding:20px 22px 18px;border-bottom:1px solid #202c23}
+.repository-identity>span{color:#657169;font:500 8px var(--mono)}
+.repository-identity>a{display:flex;align-items:center;gap:7px;margin-top:9px;color:#eef3ef;font:500 17px var(--mono)}
+.repository-identity>a b{color:#829089;font-weight:400}.repository-identity>a i{color:#435047;font-style:normal}.repository-identity>a strong{font-weight:600}
+.repository-identity>p{min-height:28px;margin:10px 0;color:#829089;font:9px/1.55 var(--mono)}
+.repository-identity dl{display:flex;gap:24px;margin:0}.repository-identity dl div{display:flex;gap:7px}.repository-identity dt,.repository-identity dd{margin:0;font:8px var(--mono)}.repository-identity dt{color:#4f5b54}.repository-identity dd{color:#aeb8b2}
+.repository-tree-head,.repository-readme>header,.repository-code-head,.repository-code-status{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #202c23}
+.repository-tree-head{padding:0 16px;color:#c9d2cc;font:500 9px var(--mono)}.repository-tree-head b{color:#58645d;font-weight:400}
+.repository-tree{min-height:0;overflow:auto;padding:8px 0;scrollbar-width:thin;scrollbar-color:#2b3930 #000}
+.repository-tree>p{padding:14px 17px;color:#637068;font:9px/1.6 var(--mono)}
+.repository-tree details{margin:0}.repository-tree details>div{padding-left:13px;border-left:1px solid #18211b}
+.repository-tree summary,.repository-tree button{display:grid;width:100%;height:27px;grid-template-columns:17px minmax(0,1fr) auto;align-items:center;padding:0 13px;color:#9ba79f;border:0;background:transparent;text-align:left;font:8px var(--mono);cursor:pointer;list-style:none}
+.repository-tree summary::-webkit-details-marker{display:none}.repository-tree summary:hover,.repository-tree button:hover,.repository-tree button.selected{color:#eef3ef;background:#081009}.repository-tree button.selected{box-shadow:inset 2px 0 #7fe03a}
+.repository-tree summary i,.repository-tree button i{color:#7fe03a;font-style:normal}.repository-tree button em{color:#465149;font-size:7px;font-style:normal}
+.repository-readme{min-height:0;overflow:hidden;border-top:1px solid #202c23}.repository-readme>header{height:34px;padding:0 16px;color:#c9d2cc;font:500 9px var(--mono)}.repository-readme>header a{color:#7fe03a;font-size:8px}
+.repository-readme>div{height:calc(100% - 34px);overflow:auto;padding:18px 20px;color:#919e96;font:9px/1.65 var(--mono);scrollbar-width:thin;scrollbar-color:#2b3930 #000}
+.repository-readme h2,.repository-readme h3,.repository-readme h4,.repository-readme h5{margin:18px 0 9px;color:#eef3ef;font-family:var(--mono);font-size:12px}.repository-readme h2:first-child{margin-top:0}.repository-readme p{margin:0 0 10px}.repository-readme ul{margin:0 0 12px;padding-left:18px}.repository-readme code{color:#b8ee94}.repository-readme pre{overflow:auto;padding:11px;border:1px solid #202c23;background:#030504}.repository-readme a{color:#7fe03a}
+.repository-code{display:grid;min-width:0;min-height:0;grid-template-rows:44px 30px minmax(0,1fr);background:#000}
+.repository-code-head{padding:0 17px}.repository-code-head>div{display:flex;align-items:center;gap:12px;min-width:0}.repository-code-head span{overflow:hidden;color:#e0e7e2;font:500 10px var(--mono);text-overflow:ellipsis;white-space:nowrap}.repository-code-head b{color:#58645d;font:400 7px var(--mono)}.repository-code-head>a{color:#7fe03a;font:8px var(--mono)}
+.repository-code-status{padding:0 17px;color:#5c6961;font:7px var(--mono)}.repository-code-status time{color:#455048}
+.repository-code-lines{min-width:0;min-height:0;overflow:auto;margin:0;padding:12px 0 28px 58px;counter-reset:source-line;background:#000;scrollbar-width:thin;scrollbar-color:#2b3930 #000}
+.repository-code-lines li{min-height:19px;padding:1px 18px 1px 12px;color:#aeb9b2;counter-increment:source-line;white-space:pre}.repository-code-lines li::marker{content:counter(source-line);color:#3f4a43;font:8px var(--mono)}.repository-code-lines li:hover{background:#071008}.repository-code-lines code{font:9px/1.7 var(--mono)}
+.machine-wall-status,.cell-status{text-transform:none!important}.machine-wall-status>span b,.cell-status>span b{text-transform:none!important}
+.lineage-workstation{grid-template-rows:625px 390px 26px!important}.treasury-workstation,.spawn-workstation{grid-template-rows:minmax(0,1fr) 26px!important}
+@media(max-width:900px){.machine-workstation{height:auto!important;min-height:calc(100dvh - 54px)!important;overflow:visible!important}.machine-workstation.is-active{display:block!important}.repository-browser{grid-template-columns:1fr}.repository-sidebar{min-height:760px;border-right:0;border-bottom:1px solid #202c23}.repository-code{min-height:650px}.machine-wall-status{min-height:28px}.lineage-workstation,.treasury-workstation,.spawn-workstation{grid-template-rows:auto!important}}
 .instrument-grid{height:330px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;gap:1px!important;padding:1px 0 0!important;background:#263229!important}
 .instrument-panel{display:grid;min-width:0;min-height:0;overflow:hidden;color:#69776e;background:#050706;font:5.5px/1.3 var(--mono)}
 .instrument-panel>header{display:flex;height:25px;align-items:center;padding:0 9px;border-bottom:1px solid #202b23;color:#b3bdb6;font-size:5.5px;font-weight:600;letter-spacing:.055em;text-transform:uppercase}
