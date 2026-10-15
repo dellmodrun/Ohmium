@@ -19,7 +19,7 @@
     verify: ["Verify / 08", "Checks output evidence before the shared model can accept it."],
   };
 
-  fetch("./assets/ohmium-circuit-core.svg?v=4")
+  fetch("./assets/ohmium-circuit-core.svg?v=5")
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();
@@ -58,10 +58,10 @@
         }
         await new Promise((resolve) => setTimeout(resolve, 650));
         clear();
-        title.textContent = "Conductor topology";
-        detail.textContent = "Inspect a component to trace its role in the circuit.";
+        title.textContent = "Agent silicon floorplan";
+        detail.textContent = "Inspect a macro to trace its execution path.";
         networkState.textContent = "Awaiting first verified signal";
-        inspect.textContent = "Inspect signal route";
+        inspect.textContent = "Inspect execution path";
         inspect.disabled = false;
         inspection = 0;
       });
