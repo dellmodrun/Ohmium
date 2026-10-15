@@ -74,6 +74,32 @@
     set("[data-market-mode]", `${candles.length} CANDLES · RSS MB`);
   }
 
+  function renderSignalLines(telemetry) {
+    const samples = samplesOf(telemetry).slice(-60);
+    const series = {
+      requests: samples.map((item, index) => requestDelta(samples, index)),
+      memory: samples.map((item) => Number(item.rssMb) || 0),
+      proofs: samples.map((item) => (Number(item.verifying) || 0) + (Number(item.generations) || 0))
+    };
+    Object.entries(series).forEach(([name, values]) => {
+      const low = Math.min(...values), high = Math.max(...values), span = high - low || 1;
+      const points = values.map((value, index) => {
+        const x = values.length === 1 ? 300 : index * (300 / (values.length - 1));
+        const y = 35 - ((value - low) / span) * 27;
+        return [x, y];
+      });
+      const line = points.map(([x, y], index) => `${index ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(2)}`).join(" ");
+      const area = points.length ? `${line}L300 42L0 42Z` : "";
+      const lineNode = one(`[data-signal-line="${name}"]`), areaNode = one(`[data-signal-area="${name}"]`);
+      if (lineNode) lineNode.setAttribute("d", line);
+      if (areaNode) areaNode.setAttribute("d", area);
+      const latest = values.at(-1) || 0;
+      set(`[data-signal-value="${name}"]`, name === "memory" ? `${latest.toFixed(1)} MB` : String(latest));
+    });
+    set("[data-signals-mode]", `LIVE · ${samples.length} SAMPLES`);
+    set("[data-signals-window]", `${Math.max(0, (samples.length - 1) * 2)} second verified window`);
+  }
+
   function renderUpdates(state, telemetry) {
     const feed = one("[data-update-feed]");
     if (!feed) return;
@@ -143,7 +169,7 @@
     set("[data-thermal-mode]", "OFFLINE");
     set("[data-activity-mode]", "OFFLINE");
     set("[data-activity-summary]", "No Core sample");
-    set("[data-market-mode]", "OFFLINE");
+    set("[data-signals-mode]", "OFFLINE");
     set(".cell-status em", `Core offline · ${clock(new Date())}`);
   }
 
@@ -176,7 +202,7 @@
     set(".cell-status em", `Core online · ${onlineMachines.length} active · ${clock(telemetry.at)}`);
     renderThermalMap(telemetry);
     renderActivityGrid(telemetry);
-    renderCandles(telemetry);
+    renderSignalLines(telemetry);
     renderUpdates(state, telemetry);
 
     const dispatchRows = all(".dispatch-grid [data-stage]").filter((row) => row.dataset.stage !== "core");

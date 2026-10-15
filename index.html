@@ -34,10 +34,14 @@
       <div class="activity-chart"><div class="activity-axis"><span>−280s</span><span>−140s</span><span>Now</span></div><div class="activity-grid" data-activity-grid></div><div class="activity-legend"><span>Less</span><i></i><i></i><i></i><i></i><i></i><span>More</span></div></div>
       <footer><span data-activity-summary>Waiting for Core samples</span><b><i data-network-online>0</i> online</b></footer>
     </article>
-    <article class="instrument-panel market-instrument" aria-label="Runtime memory candlestick chart">
-      <header>Runtime / Memory OHLC <b data-market-mode>CONNECTING</b></header>
-      <div class="market-stage"><svg data-candle-chart viewBox="0 0 360 166" preserveAspectRatio="none" aria-label="Core memory candlestick chart"></svg></div>
-      <footer><span>O <b data-ohlc="open">—</b></span><span>H <b data-ohlc="high">—</b></span><span>L <b data-ohlc="low">—</b></span><span>C <b data-ohlc="close">—</b></span></footer>
+    <article class="instrument-panel signals-instrument" aria-label="Runtime sample signals">
+      <header>Runtime / Sample Signals <b data-signals-mode>CONNECTING</b></header>
+      <div class="signals-stack">
+        <section><div><span>REQUEST RATE</span><b data-signal-value="requests">—</b></div><svg data-signal-chart="requests" viewBox="0 0 300 42" preserveAspectRatio="none"><path class="signal-grid" d="M0 8H300M0 21H300M0 34H300"/><path class="signal-area" data-signal-area="requests"/><path class="signal-line" data-signal-line="requests"/></svg></section>
+        <section><div><span>MEMORY RSS</span><b data-signal-value="memory">—</b></div><svg data-signal-chart="memory" viewBox="0 0 300 42" preserveAspectRatio="none"><path class="signal-grid" d="M0 8H300M0 21H300M0 34H300"/><path class="signal-area" data-signal-area="memory"/><path class="signal-line" data-signal-line="memory"/></svg></section>
+        <section><div><span>PROOF LOAD</span><b data-signal-value="proofs">—</b></div><svg data-signal-chart="proofs" viewBox="0 0 300 42" preserveAspectRatio="none"><path class="signal-grid" d="M0 8H300M0 21H300M0 34H300"/><path class="signal-area" data-signal-area="proofs"/><path class="signal-line" data-signal-line="proofs"/></svg></section>
+      </div>
+      <footer><span data-signals-window>Waiting for Core samples</span><b>2 second interval</b></footer>
     </article>
     <article class="instrument-panel updates-instrument" aria-label="Timestamped Core updates">
       <header>Core / Timestamped Updates <b data-network-mode>CONNECTING</b></header>
