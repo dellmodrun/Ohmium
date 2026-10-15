@@ -23,31 +23,28 @@
       <button class="ohmium-core-inspect" type="button" data-core-inspect>Inspect execution path</button>
     </div>
   </section>
-  <section class="home-data-grid" aria-label="Ohmium live network data">
-    <article class="home-data-slot monitor-panel input-monitor" aria-label="Input bus">
-      <header><span>01 / Input bus</span><b data-input-mode>NO SOURCE</b></header>
-      <div class="monitor-scope" aria-hidden="true"><svg viewBox="0 0 320 58" preserveAspectRatio="none"><path class="scope-axis" d="M0 29H320M40 0V58M80 0V58M120 0V58M160 0V58M200 0V58M240 0V58M280 0V58"/><path class="scope-signal" data-input-wave d="M0 29H320"/></svg></div>
-      <div class="monitor-empty" data-input-empty><i></i><strong>No verified event received</strong><span>Gateway input remains closed until a signed source is connected.</span></div>
-      <dl class="monitor-facts"><dt>Gateway</dt><dd data-input-gateway>Disconnected</dd><dt>Queue depth</dt><dd data-input-queue>—</dd><dt>Last event</dt><dd data-input-last>—</dd></dl>
+  <section class="home-data-grid instrument-grid" aria-label="Ohmium live network instruments">
+    <article class="instrument-panel solver-instrument" aria-label="Signal particle solver">
+      <header>Signal / Particle Solver <b data-solver-mode>CONNECTING</b></header>
+      <div class="particle-field"><svg data-particle-field viewBox="0 0 320 118" preserveAspectRatio="none" aria-label="Core request flow field"></svg></div>
+      <div class="solver-register"><span><b>REQUESTS</b><em data-core-requests>—</em></span><span><b>OPEN TASKS</b><em data-input-queue>—</em></span><span><b>CORE UPTIME</b><em data-core-uptime>—</em></span></div>
     </article>
-    <article class="home-data-slot monitor-panel trace-monitor" aria-label="Execution trace">
-      <header><span>02 / Execution trace</span><b data-trace-mode>STANDBY</b></header>
-      <ol class="trace-stack" data-trace-stack>
-        <li data-stage="sensor"><i></i><span>Sense</span><em>—</em></li><li data-stage="filter"><i></i><span>Filter</span><em>—</em></li><li data-stage="oracle"><i></i><span>Oracle</span><em>—</em></li><li data-stage="guard"><i></i><span>Guard</span><em>—</em></li><li data-stage="router"><i></i><span>Route</span><em>—</em></li><li data-stage="memory"><i></i><span>Memory</span><em>—</em></li><li data-stage="archive"><i></i><span>Archive</span><em>—</em></li><li data-stage="verify"><i></i><span>Verify</span><em>—</em></li><li data-stage="core"><i></i><span>Conductor</span><em>—</em></li>
-      </ol>
-      <footer><span data-trace-id>No execution selected</span><b data-trace-result>Awaiting signal</b></footer>
+    <article class="instrument-panel field-instrument" aria-label="Shared state difference field">
+      <header>Shared State / Difference Field <b data-field-mode>CONNECTING</b></header>
+      <div class="field-pair"><div><span>REGISTRY REFERENCE</span><i class="field-matrix" data-field-matrix="reference"></i></div><div><span>LIVE EVENT FIELD</span><i class="field-matrix" data-field-matrix="event"></i></div></div>
+      <div class="field-bars" data-field-bars aria-label="Absolute state difference"></div>
+      <footer><span>Absolute state delta</span><b data-field-delta>—</b></footer>
     </article>
-    <article class="home-data-slot monitor-panel proof-monitor" aria-label="Proof buffer">
-      <header><span>03 / Proof buffer</span><b data-proof-mode>EMPTY</b></header>
-      <div class="proof-zero" data-proof-zero><span>∅</span><strong>Awaiting first proof</strong><p>A record appears only after deterministic verification succeeds.</p></div>
-      <dl class="proof-register"><dt>Proof ID</dt><dd data-proof-id>—</dd><dt>Event hash</dt><dd data-proof-hash>—</dd><dt>Verifiers</dt><dd data-proof-verifiers>—</dd><dt>Completed</dt><dd data-proof-time>—</dd></dl>
+    <article class="instrument-panel validation-instrument" aria-label="Validation sample buffer">
+      <header>Validation / Sample Buffer <b data-proof-mode>CONNECTING</b></header>
+      <div class="wave-stack"><p><span>REQUEST RATE</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="requests" d="M0 14H220"/></svg></p><p><span>MEMORY</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="memory" d="M0 14H220"/></svg></p><p><span>PROOF LOAD</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="proofs" d="M0 14H220"/></svg></p></div>
+      <footer><span data-proof-id>Proof —</span><b data-proof-hash>Hash —</b><i data-proof-verifiers>0 verifiers</i><em data-proof-time>—</em></footer><div hidden data-proof-zero></div>
     </article>
-    <article class="home-data-slot monitor-panel network-monitor" aria-label="Network and economics">
-      <header><span>04 / Network + economics</span><b data-network-mode>PRE-LAUNCH</b></header>
-      <div class="network-register">
-        <div><span>Network</span><strong>Solana</strong><small>mainnet</small></div><div><span>Contract</span><strong>TBA</strong><small>not published</small></div><div><span>Components</span><strong data-network-components>—</strong><small>registered</small></div><div><span>Burn</span><strong>10,000</strong><small>$OHMIUM per deployment</small></div><div><span>Creator rewards</span><strong data-network-rewards>—</strong><small>received on-chain</small></div><div><span>Treasury</span><strong data-network-treasury>—</strong><small>verified balance</small></div>
-      </div>
-      <footer><i></i><span data-network-foot>Waiting for verified network state</span></footer>
+    <article class="instrument-panel index-instrument" aria-label="Agent reference index">
+      <header>Agent / Reference Index <b data-network-mode>CONNECTING</b></header>
+      <div class="index-head"><span>AGENT</span><span>16-SAMPLE STATE FIELD</span><span>MODE</span></div>
+      <div class="index-body" data-component-index></div>
+      <footer><span data-network-foot>Waiting for verified Core state</span><b><i data-network-components>—</i> owner agents</b><em data-network-treasury>—</em><i hidden data-network-rewards>—</i></footer>
     </article>
   </section>
   <footer class="cell-status"><span><b>Ohmium</b> · Agent circuit</span><em><i></i> Connecting&nbsp;&nbsp; <time id="clock">--:--:-- ET</time></em></footer>

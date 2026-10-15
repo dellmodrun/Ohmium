@@ -8,6 +8,123 @@
   const clock = (value) => value ? new Date(value).toLocaleTimeString([], { hour12: false }) : "—";
   const duration = (seconds = 0) => { const value = Math.max(0, Number(seconds) || 0), hours = Math.floor(value / 3600), minutes = Math.floor((value % 3600) / 60); return hours ? `${hours}h ${minutes}m` : `${minutes}m ${Math.floor(value % 60)}s`; };
   const stages = ["sensor", "filter", "oracle", "guard", "router", "memory", "archive", "verify"];
+  const sampleBuffer = { requests: [], memory: [], proofs: [] };
+  let previousRequests = null;
+
+  function hashText(value) {
+    return [...String(value || "")].reduce((hash, character) => ((hash << 5) - hash + character.charCodeAt(0)) >>> 0, 2166136261);
+  }
+
+  function sample(name, value) {
+    const series = sampleBuffer[name];
+    series.push(Number.isFinite(Number(value)) ? Number(value) : 0);
+    if (series.length > 28) series.shift();
+  }
+
+  function wavePath(values) {
+    if (!values.length) return "M0 14H220";
+    const padded = values.length < 28 ? Array(28 - values.length).fill(values[0]).concat(values) : values.slice(-28);
+    const low = Math.min(...padded), high = Math.max(...padded), span = high - low || Math.max(1, Math.abs(high));
+    return padded.map((value, index) => {
+      const x = index * (220 / (padded.length - 1));
+      const y = 24 - ((value - low) / span) * 20;
+      return `${index ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(2)}`;
+    }).join(" ");
+  }
+
+  function renderWaves(telemetry) {
+    const coreSamples = Array.isArray(telemetry.samples) ? telemetry.samples : [];
+    if (coreSamples.length > 1) {
+      sampleBuffer.requests = coreSamples.map((item, index) => index ? Math.max(0, Number(item.requests) - Number(coreSamples[index - 1].requests)) : 0).slice(-28);
+      sampleBuffer.memory = coreSamples.map((item) => Number(item.rssMb) || 0).slice(-28);
+      sampleBuffer.proofs = coreSamples.map((item) => (Number(item.verifying) || 0) + (Number(item.generations) || 0)).slice(-28);
+      previousRequests = Number(telemetry.requests) || 0;
+    } else {
+    const requests = Number(telemetry.requests) || 0;
+    const requestRate = previousRequests == null ? 0 : Math.max(0, requests - previousRequests);
+    previousRequests = requests;
+    sample("requests", requestRate);
+    sample("memory", telemetry.rssMb);
+    sample("proofs", (Number(telemetry.verifying) || 0) + (Number(telemetry.generations) || 0));
+    }
+    Object.entries(sampleBuffer).forEach(([name, values]) => {
+      const path = one(`[data-wave="${name}"]`);
+      if (path) path.setAttribute("d", wavePath(values));
+    });
+  }
+
+  function renderParticleField(telemetry) {
+    const svg = one("[data-particle-field]");
+    if (!svg) return;
+    const requestPhase = (Number(telemetry.requests) || 0) * 0.031;
+    const uptimePhase = (Number(telemetry.uptimeSec) || 0) * 0.006;
+    const memoryPhase = (Number(telemetry.rssMb) || 0) * 0.013;
+    const vectors = [];
+    for (let row = 0; row < 7; row += 1) {
+      for (let column = 0; column < 18; column += 1) {
+        const x = 10 + column * 17.7, y = 11 + row * 16;
+        const angle = Math.sin(column * 0.46 + uptimePhase) * 0.72 + Math.cos(row * 0.83 + requestPhase) * 0.48 + memoryPhase * 0.08;
+        const length = 5.5 + ((column + row + Math.floor(requestPhase)) % 5) * 0.75;
+        const dx = Math.cos(angle) * length, dy = Math.sin(angle) * length;
+        const opacity = (0.28 + ((column * 3 + row * 5 + Math.floor(requestPhase)) % 7) * 0.07).toFixed(2);
+        vectors.push(`<path class="flow-vector" style="opacity:${opacity}" d="M${x.toFixed(1)} ${y.toFixed(1)}l${dx.toFixed(1)} ${dy.toFixed(1)}"/>`);
+      }
+    }
+    svg.innerHTML = `<defs><marker id="flow-tip" viewBox="0 0 4 4" refX="3" refY="2" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0L4 2L0 4Z"/></marker></defs>${vectors.join("")}`;
+  }
+
+  function fieldValues(items, size, salt) {
+    const values = Array(size).fill(0);
+    items.forEach((item, itemIndex) => {
+      const source = typeof item === "string" ? item : JSON.stringify(item);
+      let seed = hashText(`${salt}:${source}:${itemIndex}`);
+      for (let step = 0; step < 9; step += 1) {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        values[seed % size] = Math.max(values[seed % size], 0.32 + ((seed >>> 8) % 68) / 100);
+      }
+    });
+    return values;
+  }
+
+  function renderDifferenceField(state) {
+    const agents = Array.isArray(state.officialAgents) ? state.officialAgents : [];
+    const events = Array.isArray(state.events) ? state.events.slice(0, 16) : [];
+    const reference = fieldValues(agents.map((agent) => `${agent.id}:${agent.role}:${agent.status}`), 126, "registry");
+    const live = fieldValues(events.map((event) => `${event.id}:${event.type}:${event.at}`), 126, "events");
+    [["reference", reference], ["event", live]].forEach(([name, values]) => {
+      const field = one(`[data-field-matrix="${name}"]`);
+      if (!field) return;
+      field.innerHTML = values.map((value) => `<span style="--level:${value.toFixed(2)}"></span>`).join("");
+    });
+    const bars = one("[data-field-bars]");
+    if (bars) {
+      bars.innerHTML = Array.from({ length: 18 }, (_, index) => {
+        const start = Math.floor(index * 7), difference = reference.slice(start, start + 7).reduce((total, value, offset) => total + Math.abs(value - live[start + offset]), 0) / 7;
+        return `<i style="height:${Math.max(8, difference * 100).toFixed(1)}%"></i>`;
+      }).join("");
+    }
+    set("[data-field-mode]", events.length ? "LIVE DELTA" : "REFERENCE ONLY");
+    set("[data-field-delta]", events.length ? `${events.length} recorded events` : "No event sample");
+  }
+
+  function renderAgentIndex(state) {
+    const index = one("[data-component-index]");
+    if (!index) return;
+    const agents = Array.isArray(state.officialAgents) ? state.officialAgents : [];
+    const machines = Array.isArray(state.machines) ? state.machines : [];
+    index.innerHTML = agents.map((agent, row) => {
+      const machine = machines.find((item) => item.id === agent.machineId);
+      const samples = Array.isArray(machine?.samples) ? machine.samples.slice(-16) : [];
+      const signature = hashText(`${agent.id}:${agent.role}:${agent.responsibility}`);
+      const cells = Array.from({ length: 16 }, (_, column) => {
+        const registryBit = ((signature >>> (column % 24)) & 1) === 1;
+        const runtime = samples[column - (16 - samples.length)];
+        const className = runtime ? `is-${runtime.status === "busy" ? "busy" : "live"}` : registryBit ? "is-reference" : "";
+        return `<i class="${className}"></i>`;
+      }).join("");
+      return `<div class="index-row"><b>${String(row + 1).padStart(2, "0")} ${agent.role || agent.id}</b><span class="index-cells">${cells}</span><em>${agent.status || "ready"}</em></div>`;
+    }).join("");
+  }
 
   function clearTrace() {
     all("[data-stage]").forEach((row) => {
@@ -62,6 +179,9 @@
     set("[data-proof-hash]", "Hash —");
     set("[data-proof-verifiers]", "0 verifiers");
     set("[data-proof-time]", "—");
+    set("[data-solver-mode]", "OFFLINE");
+    set("[data-field-mode]", "OFFLINE");
+    set("[data-field-delta]", "No Core sample");
     set(".cell-status em", `Core offline · ${clock(new Date())}`);
   }
 
@@ -92,6 +212,11 @@
     set("[data-network-verifying]", String(telemetry.verifying));
     set("[data-network-generations]", String(telemetry.generations));
     set(".cell-status em", `Core online · ${onlineMachines.length} active · ${clock(telemetry.at)}`);
+    set("[data-solver-mode]", "LIVE CORE");
+    renderParticleField(telemetry);
+    renderDifferenceField(state);
+    renderWaves(telemetry);
+    renderAgentIndex(state);
 
     const dispatchRows = all(".dispatch-grid [data-stage]").filter((row) => row.dataset.stage !== "core");
     dispatchRows.forEach((row, index) => {
@@ -124,15 +249,6 @@
     }
   }
 
-  const index = one("[data-component-index]");
-  if (index) {
-    ["SENSE", "FILTER", "MEASURE", "GUARD", "ROUTE", "MEMORY", "ARCHIVE", "VERIFY"].forEach((name, row) => {
-      const item = document.createElement("div");
-      item.className = "index-row";
-      item.innerHTML = `<b>${String(row + 1).padStart(2, "0")} ${name}</b><span class="index-cells">${"<i></i>".repeat(16)}</span><em>idle</em>`;
-      index.append(item);
-    });
-  }
   document.addEventListener("ohmium:data", (event) => render(event.detail));
   if (window.OhmiumData?.checkedAt) render(window.OhmiumData);
   else empty();

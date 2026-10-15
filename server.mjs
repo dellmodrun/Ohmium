@@ -11,7 +11,7 @@ const host = process.env.HOST || "127.0.0.1";
 const adminToken = process.env.OHMIUM_ADMIN_TOKEN || "";
 const registrationKey = process.env.OHMIUM_REGISTRATION_KEY || "";
 const allowedOrigin = process.env.OHMIUM_ALLOWED_ORIGIN || "";
-const clients = new Set(), rate = new Map(), metrics = { startedAt: Date.now(), requests: 0 };
+const clients = new Set(), rate = new Map(), metrics = { startedAt: Date.now(), requests: 0, samples: [] };
 const officialCatalog = JSON.parse(readFileSync(resolve(root, "official-agents.json"), "utf8"));
 const economicPolicy = Object.freeze({
   schema: "ohmium.economics.v1",
@@ -54,6 +54,13 @@ function officialAgents() {
 function publicState() { return { ...state, machines: state.machines.map(cleanMachine), mutations: state.mutations.map(cleanMutation), officialAgents: officialAgents(), economics: economicPolicy }; }
 function emit(type, payload) { const event = { id: id("event"), type, at: now(), payload }; state.events.unshift(event); state.events = state.events.slice(0, 500); persist(); const frame = `event: ${type}\ndata: ${JSON.stringify(event)}\n\n`; for (const client of clients) client.write(frame); }
 function json(response, status, value) { response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }); response.end(JSON.stringify(value)); }
+function recordCoreSample() {
+  const memory = process.memoryUsage();
+  metrics.samples.push({ at: now(), requests: metrics.requests, rssMb: Number((memory.rss / 1048576).toFixed(1)), heapMb: Number((memory.heapUsed / 1048576).toFixed(1)), verifying: state.mutations.filter((item) => item.status === "verifying").length, generations: state.lineage.length });
+  metrics.samples = metrics.samples.slice(-60);
+}
+recordCoreSample();
+setInterval(recordCoreSample, 2000).unref();
 async function body(request) { const chunks = []; let bytes = 0; for await (const chunk of request) { bytes += chunk.length; if (bytes > 600000) throw new Error("request body exceeds 600KB"); chunks.push(chunk); } return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {}; }
 function machineAuth(request) { const token = request.headers.authorization?.replace(/^Bearer\s+/i, ""); return token ? state.machines.find((machine) => equal(machine.secretHash, hash(token))) || null : null; }
 function loopback(request) { return ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(request.socket.remoteAddress); }
@@ -92,7 +99,7 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && path === "/api/economics") return json(response, 200, economicPolicy);
     if (request.method === "GET" && path === "/api/agents") return json(response, 200, { schema: officialCatalog.schema, label: officialCatalog.label, agents: officialAgents() });
     if (request.method === "GET" && (path === "/api/sources" || path === "/api/github-stream")) return json(response, 200, { at: now(), sources: repositories(), channels: [] });
-    if (request.method === "GET" && path === "/api/telemetry") { const memory = process.memoryUsage(), machines = state.machines.map(cleanMachine); return json(response, 200, { at: now(), startedAt: new Date(metrics.startedAt).toISOString(), uptimeSec: Math.floor(process.uptime()), pid: process.pid, rssMb: Number((memory.rss / 1048576).toFixed(1)), heapMb: Number((memory.heapUsed / 1048576).toFixed(1)), requests: metrics.requests, sseClients: clients.size, onlineMachines: machines.filter((machine) => machine.status !== "offline").length, totalMachines: machines.length, openTasks: state.tasks.filter((task) => task.status === "open").length, verifying: state.mutations.filter((item) => item.status === "verifying").length, generations: state.lineage.length, events: state.events.length }); }
+    if (request.method === "GET" && path === "/api/telemetry") { const memory = process.memoryUsage(), machines = state.machines.map(cleanMachine); return json(response, 200, { at: now(), startedAt: new Date(metrics.startedAt).toISOString(), uptimeSec: Math.floor(process.uptime()), pid: process.pid, rssMb: Number((memory.rss / 1048576).toFixed(1)), heapMb: Number((memory.heapUsed / 1048576).toFixed(1)), requests: metrics.requests, sseClients: clients.size, onlineMachines: machines.filter((machine) => machine.status !== "offline").length, totalMachines: machines.length, openTasks: state.tasks.filter((task) => task.status === "open").length, verifying: state.mutations.filter((item) => item.status === "verifying").length, generations: state.lineage.length, events: state.events.length, samples: metrics.samples.slice(-28) }); }
     if (request.method === "GET" && path === "/api/state") return json(response, 200, publicState());
     if (request.method === "GET" && path === "/api/events") { response.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" }); response.write(`event: snapshot\ndata: ${JSON.stringify(publicState())}\n\n`); clients.add(response); request.on("close", () => clients.delete(response)); return; }
     if (request.method === "GET" && path === "/api/tasks") return json(response, 200, { tasks: state.tasks });
