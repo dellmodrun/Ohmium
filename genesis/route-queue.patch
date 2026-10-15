@@ -1,0 +1,45 @@
+diff --git a/benchmarks/route-queue.mjs b/benchmarks/route-queue.mjs
+index cee0e91..ca0c315 100644
+--- a/benchmarks/route-queue.mjs
++++ b/benchmarks/route-queue.mjs
+@@ -1,14 +1,33 @@
+ export function orderSignals(signals) {
+-  const pending = signals.map((cost, index) => ({ cost, index }));
++  const heap = signals.map((cost, index) => ({ cost, index }));
+   const order = [];
+   let operations = 0;
+-  while (pending.length) {
+-    let minimum = 0;
+-    for (let index = 1; index < pending.length; index += 1) {
+-      operations += 1;
+-      if (pending[index].cost < pending[minimum].cost || (pending[index].cost === pending[minimum].cost && pending[index].index < pending[minimum].index)) minimum = index;
++  const less = (left, right) => {
++    operations += 1;
++    return left.cost < right.cost || (left.cost === right.cost && left.index < right.index);
++  };
++  const down = (start) => {
++    let parent = start;
++    while (true) {
++      const left = parent * 2 + 1;
++      const right = left + 1;
++      if (left >= heap.length) return;
++      let child = left;
++      if (right < heap.length && less(heap[right], heap[left])) child = right;
++      if (!less(heap[child], heap[parent])) return;
++      [heap[parent], heap[child]] = [heap[child], heap[parent]];
++      parent = child;
+     }
+-    order.push(pending.splice(minimum, 1)[0].index);
++  };
++  for (let index = Math.floor(heap.length / 2) - 1; index >= 0; index -= 1) down(index);
++  while (heap.length) {
++    const first = heap[0];
++    const tail = heap.pop();
++    if (heap.length) {
++      heap[0] = tail;
++      down(0);
++    }
++    order.push(first.index);
+   }
+   return { order, operations };
+ }

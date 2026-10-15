@@ -3,7 +3,7 @@ import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const output = resolve(root, "source-index.json");
-const excludedDirectories = new Set([".git", ".edge-qa", "data", "node_modules"]);
+const excludedDirectories = new Set([".git", ".edge-qa", "data", "dist-pages", "node_modules"]);
 const excludedFiles = new Set(["source-index.json", ".ohmium-worker.json"]);
 const visibleDotfiles = new Set([".dockerignore", ".env.example", ".github", ".gitignore"]);
 const textExtensions = new Set(["", ".css", ".example", ".html", ".js", ".json", ".md", ".mjs", ".svg", ".txt", ".yml", ".yaml"]);

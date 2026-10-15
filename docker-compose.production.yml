@@ -1,6 +1,22 @@
+x-agent: &agent
+  image: ohmium-runtime:latest
+  restart: unless-stopped
+  depends_on:
+    ohmium:
+      condition: service_healthy
+  env_file: .env.production
+  networks: [tardumo]
+  command: ["sh", "-c", "node /app/deploy/register-worker.mjs && node /app/worker.mjs start --server http://ohmium:4210"]
+
+x-replay-agent: &replay-agent
+  <<: *agent
+  command: ["sh", "-c", "node /app/deploy/register-worker.mjs && node /app/worker.mjs start --auto --server http://ohmium:4210"]
+  group_add: ["${DOCKER_GID}"]
+
 services:
   ohmium:
     container_name: ohmium-core
+    image: ohmium-runtime:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,39 +28,86 @@ services:
       OHMIUM_DATA_DIR: /app/data
     volumes:
       - ./data/core:/app/data
-    networks:
-      - tardumo
+    networks: [tardumo]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4210/api/health"]
       interval: 20s
       timeout: 4s
       retries: 4
 
-  worker:
-    container_name: ohmium-worker
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      ohmium:
-        condition: service_healthy
+  agent-sense:
+    <<: *agent
+    container_name: ohmium-agent-sense
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-sense", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_ACTIVITY: "observing signed repository and task inputs" }
+    volumes: ["./data/workers/ohm-sense:/opt/ohmium/data/worker"]
+
+  agent-filter:
+    <<: *agent
+    container_name: ohmium-agent-filter
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-filter", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_ACTIVITY: "validating bounded input schemas" }
+    volumes: ["./data/workers/ohm-filter:/opt/ohmium/data/worker"]
+
+  agent-measure:
+    <<: *agent
+    container_name: ohmium-agent-measure
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-oracle", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_ACTIVITY: "monitoring reproducible benchmark baselines" }
+    volumes: ["./data/workers/ohm-oracle:/opt/ohmium/data/worker"]
+
+  agent-guard:
+    <<: *agent
+    container_name: ohmium-agent-guard
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-guard", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_ACTIVITY: "monitoring authorization and resource policy" }
+    volumes: ["./data/workers/ohm-guard:/opt/ohmium/data/worker"]
+
+  agent-route:
+    <<: *agent
+    container_name: ohmium-agent-route
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-router", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_RUN_ROOT: "/opt/ohmium/data/runs", OHMIUM_ACTIVITY: "routing open work to eligible execution paths" }
+    volumes:
+      - ./data/workers/ohm-router:/opt/ohmium/data/worker
+      - /opt/ohmium/data/runs:/opt/ohmium/data/runs
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add: ["${DOCKER_GID}"]
+
+  agent-memory:
+    <<: *agent
+    container_name: ohmium-agent-memory
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-memory", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_ACTIVITY: "monitoring persistent task and lineage state" }
+    volumes: ["./data/workers/ohm-memory:/opt/ohmium/data/worker"]
+
+  agent-archive:
+    <<: *replay-agent
+    container_name: ohmium-agent-archive
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-archive", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_RUN_ROOT: "/opt/ohmium/data/runs", OHMIUM_ACTIVITY: "indexing events and independently replaying queued evidence" }
+    volumes:
+      - ./data/workers/ohm-archive:/opt/ohmium/data/worker
+      - /opt/ohmium/data/runs:/opt/ohmium/data/runs
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  agent-verify:
+    <<: *replay-agent
+    container_name: ohmium-agent-verify
+    environment: { OHMIUM_API_URL: "http://ohmium:4210", OHMIUM_WORKER_NAME: "ohm-verify", OHMIUM_WORKER_CONFIG: "/opt/ohmium/data/worker/config.json", OHMIUM_RUN_ROOT: "/opt/ohmium/data/runs", OHMIUM_ACTIVITY: "independent replay worker; polling verification queue" }
+    volumes:
+      - ./data/worker:/opt/ohmium/data/worker
+      - /opt/ohmium/data/runs:/opt/ohmium/data/runs
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  genesis:
+    profiles: [tools]
+    image: ohmium-runtime:latest
     env_file: .env.production
     environment:
       OHMIUM_API_URL: http://ohmium:4210
-      OHMIUM_WORKER_NAME: ohm-verify
       OHMIUM_WORKER_CONFIG: /opt/ohmium/data/worker/config.json
       OHMIUM_RUN_ROOT: /opt/ohmium/data/runs
-      OHMIUM_ACTIVITY: independent replay worker; polling verification queue
-    command: ["sh", "-c", "node /app/deploy/register-worker.mjs && node /app/worker.mjs start --auto --server http://ohmium:4210"]
+    command: ["node", "/app/deploy/seed-genesis.mjs"]
     volumes:
-      - ./data/worker:/opt/ohmium/data/worker
-      - ./data/runs:/opt/ohmium/data/runs
+      - ./data/workers/ohm-router:/opt/ohmium/data/worker
+      - /opt/ohmium/data/runs:/opt/ohmium/data/runs
       - /var/run/docker.sock:/var/run/docker.sock
-    group_add:
-      - "${DOCKER_GID}"
-    networks:
-      - tardumo
+    group_add: ["${DOCKER_GID}"]
+    networks: [tardumo]
 
 networks:
   tardumo:

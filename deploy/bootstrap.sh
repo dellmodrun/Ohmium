@@ -2,7 +2,9 @@
 set -eu
 
 cd /opt/ohmium
-mkdir -p data/core data/worker data/runs
+mkdir -p data/core data/worker data/runs \
+  data/workers/ohm-sense data/workers/ohm-filter data/workers/ohm-oracle \
+  data/workers/ohm-guard data/workers/ohm-router data/workers/ohm-memory data/workers/ohm-archive
 chown -R 1000:1000 data
 
 if [ ! -f .env.production ]; then
@@ -21,3 +23,5 @@ fi
 
 docker compose --env-file .env.production -f docker-compose.production.yml up -d --build --remove-orphans
 docker compose --env-file .env.production -f docker-compose.production.yml ps
+release_commit="$(git rev-parse HEAD)"
+docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm -e "OHMIUM_RELEASE_COMMIT=${release_commit}" genesis

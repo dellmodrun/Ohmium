@@ -71,6 +71,16 @@
         const key = event.detail?.component;
         if (states[key]) activate(key, "event");
       });
+      document.addEventListener("ohmium:data", (event) => {
+        if (inspection || !event.detail?.online) return;
+        const telemetry = event.detail.telemetry || {};
+        const lineage = event.detail.state?.lineage || [];
+        networkState.textContent = lineage.length ? `Generation ${lineage.length} verified` : `${telemetry.onlineMachines || 0} agents online · awaiting first task`;
+      });
+      if (window.OhmiumData?.online) {
+        const lineage = window.OhmiumData.state?.lineage || [];
+        networkState.textContent = lineage.length ? `Generation ${lineage.length} verified` : `${window.OhmiumData.telemetry?.onlineMachines || 0} agents online · awaiting first task`;
+      }
     })
     .catch(() => {
       title.textContent = "Circuit renderer unavailable";

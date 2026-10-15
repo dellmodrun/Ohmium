@@ -78,7 +78,7 @@
     set("[data-input-queue]", String(telemetry.openTasks));
     set("[data-input-last]", lastEvent ? `${lastEvent.type} · ${clock(lastEvent.at)}` : "—");
     set("[data-network-mode]", "CONNECTED");
-    set("[data-network-components]", String(onlineMachines.length));
+    set("[data-network-components]", String(telemetry.totalMachines));
     set("[data-network-treasury]", state.treasury?.initialized && state.treasury.balanceSol != null ? `${state.treasury.balanceSol} SOL` : "—");
     set("[data-network-foot]", `Core verified · ${clock(telemetry.at)}`);
     set("[data-core-mode]", "CONNECTED");
@@ -106,6 +106,7 @@
     });
     set("[data-trace-id]", `${officialAgents.length} official agents`);
     set("[data-trace-result]", onlineMachines.length ? `${onlineMachines.length} connected` : "Ready · 0 connected");
+    set("[data-trace-mode]", `${onlineMachines.length}/${officialAgents.length} ONLINE`);
 
     const proof = state.lineage?.at?.(-1);
     if (proof) {
