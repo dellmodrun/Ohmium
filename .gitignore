@@ -1,0 +1,7 @@
+data/state.json
+data/state.json.tmp
+.cellumo-worker.json
+.env
+agents/*/.cellumo-worker.json
+agents/*/agent.log
+agents/pids.json

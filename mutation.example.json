@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/your-org/your-repository",
+  "target": "src/hot-path.rs",
+  "baseCommit": "0123456789abcdef",
+  "patchDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "summary": "Describe the bounded change and why it should improve the metric",
+  "metric": "p95_ms",
+  "baselineMetric": 100,
+  "candidateMetric": 90,
+  "lowerIsBetter": true,
+  "testsPassed": true
+}

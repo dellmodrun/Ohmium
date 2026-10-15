@@ -1,0 +1,12 @@
+{
+  "title": "Optimize the declared hot path",
+  "repository": "https://github.com/your-org/your-repository",
+  "baseCommit": "0123456789abcdef",
+  "target": "src/hot-path.rs",
+  "dockerImage": "rust:1.82-alpine",
+  "testCommand": ["cargo", "test", "--locked"],
+  "benchmarkCommand": ["./bench-json"],
+  "metric": "p95_ms",
+  "lowerIsBetter": true,
+  "minGainPct": 2
+}

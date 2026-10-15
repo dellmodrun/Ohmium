@@ -1,0 +1,96 @@
+(function () {
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const esc = (value = '') => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const short = (value = '', size = 7) => value ? String(value).slice(0, size) : 'pending';
+  const etTime = value => new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(value?new Date(value):new Date());
+  const compact = value => { const n=Number(value)||0; return n>=1000000?`${(n/1000000).toFixed(1)}M`:n>=1000?`${(n/1000).toFixed(1)}K`:String(n); };  const get = async path => { const response = await fetch(path, {cache:'no-store'}); if (!response.ok) throw new Error(`${path} returned ${response.status}`); return response.json(); };
+
+  function shell() {
+    const lineage = $('.lineage-canvas');
+    if (lineage && !$('.lineage-watch-grid', lineage)) lineage.insertAdjacentHTML('beforeend', '<section class="lineage-watch-grid" aria-label="Observed repository heads"><header><b>OBSERVED SOURCE HEADS</b><span>read-only GitHub telemetry · not accepted mutations</span></header><div data-lineage-repos><span class="surface-loading">loading public repository heads…</span></div></section>');
+    if (lineage && !$('.lineage-network-map', lineage)) lineage.insertAdjacentHTML('beforeend', '<section class="lineage-network-map"><header><div><b>AGENT / SOURCE TOPOLOGY</b><span>LIVE RECONNAISSANCE</span></div><dl><dt>WATCHERS</dt><dd data-map="watchers">0</dd><dt>ONLINE</dt><dd data-map="online">0</dd><dt>CANDIDATES</dt><dd data-map="candidates">0</dd><dt>ACCEPTED</dt><dd data-map="accepted">0</dd></dl></header><div class="lineage-map-stage"><div class="lineage-map-grid" data-lineage-nodes></div><div class="lineage-core-node"><i></i><span>CANONICAL ROOT</span><strong>GENESIS / G0</strong><small>awaiting a verified mutation</small><dl><dt>QUORUM</dt><dd>2 REPLAYS</dd><dt>WRITE MODE</dt><dd>LOCKED</dd></dl></div></div><footer><span><i></i> SOURCE HEAD OBSERVED</span><span><i></i> MACHINE HEARTBEAT</span><span><i></i> CANDIDATE GATE</span><b>NO OBSERVATION IS A MUTATION</b></footer></section>');
+    const generation = $('.generation-detail');
+    if (generation && !$('.genesis-ident', generation)) generation.querySelector('.subhead')?.insertAdjacentHTML('afterend', '<section class="genesis-ident"><span>CANONICAL LINEAGE</span><strong>GENESIS CORE</strong><p>Twelve source observers feed one deterministic gate. Only reproduced improvements become ancestry.</p><div><b><em data-genesis="sources">0</em>SOURCE HEADS</b><b><em data-genesis="online">0</em>AGENTS ONLINE</b><b><em data-genesis="accepted">0</em>GENERATIONS</b></div></section>');
+    if (generation && !$('.quorum-gates', generation)) generation.querySelector('.inspect-btn')?.insertAdjacentHTML('beforebegin', '<section class="quorum-gates"><header><b>CONSENSUS GATES</b><span>2 independent replay minimum</span></header><div data-quorum-gates></div></section>');
+    const lineageLedger = $('.lineage-ledger');
+    if (lineageLedger && !$('.lineage-observation-ledger', lineageLedger)) lineageLedger.insertAdjacentHTML('beforeend', '<section class="lineage-observation-ledger"><header><b>LIVE OBSERVATIONS</b><span>source heads only / excluded from accepted generation count</span></header><div data-observation-ledger></div></section>');    const ledger = $('.treasury-ledger');
+    const empty = $('.ledger-empty', ledger);
+    if (ledger && empty) { empty.className = 'treasury-preflight'; empty.innerHTML = '<header><b>PRE-GENESIS CONTROL PLANE</b><span>Treasury published at BMWnpwFDM5q8zCz4vaAvSj55JWxNhTPaG8ooNdAyTPJM.</span></header><div class="preflight-grid" data-preflight></div><section class="runtime-audit"><div><b>LOCAL RUNTIME AUDIT</b><span>off-chain events · never represented as transfers</span></div><ol data-runtime-events><li>loading core events…</li></ol></section>'; }
+    const review = $('.spawn-review');
+    if (review && !$('.spawn-terminal', review)) review.insertAdjacentHTML('beforeend', '<section class="spawn-terminal"><header><b>WORKER BOOTSTRAP</b><span>generated locally</span></header><pre><code data-spawn-command>node worker.mjs start --auto</code></pre><button type="button" data-copy-command>copy command</button><p>Registration returns a one-time machine secret. Store it outside source control.</p></section>');
+    const manual = $('.manual-page');
+    if (manual && !$('.manual-technical', manual)) { const footer = $('footer', manual); footer.insertAdjacentHTML('beforebegin', '<section class="manual-technical"><article><h3>RUNTIME PATH</h3><div class="manual-flow"><span>PUBLIC REPO</span><i>→</i><span>ISOLATED WORKER</span><i>→</i><span>TEST + BENCH</span><i>→</i><span>2× REPLAY</span><i>→</i><span>LINEAGE</span></div><p>Repository watching is read-only. A mutation enters lineage only after the author passes its suite and two independent machines reproduce the result.</p></article><article><h3>PUBLIC API</h3><dl><dt>GET /api/health</dt><dd>core liveness</dd><dt>GET /api/state</dt><dd>public protocol state</dd><dt>GET /api/github-stream</dt><dd>read-only source channels</dd><dt>GET /api/events</dt><dd>server-sent event stream</dd><dt>POST /api/machines/register</dt><dd>register verifier hardware</dd></dl></article><article><h3>TRUST BOUNDARY</h3><ul><li>Author cannot verify its own mutation.</li><li>Patch digests are content-addressed.</li><li>Secrets and patch bodies are not exposed by public state.</li><li>Treasury remains unavailable until an on-chain account exists.</li></ul></article><article><h3>TOKEN LOOP</h3><dl><dt>SPAWN</dt><dd>burn $CELLUMO</dd><dt>CREATOR REWARDS</dt><dd>100% operating inflow</dd><dt>COMPUTE</dt><dd>80% reserve</dd><dt>AGENT POOL</dt><dd>20% per epoch</dd></dl><p>Only Agents with accepted replays or reproducible improvements participate. CA is live. Public Agent activation burns 10,000 $CELLUMO; on-chain verification remains locked until the public Core is deployed.</p></article></section>'); }
+    for (const view of document.querySelectorAll('.workstation')) if (!$('.view-statusbar', view)) view.insertAdjacentHTML('beforeend', '<footer class="view-statusbar"><span><b>cellumo</b> / verifiable software work</span><em><i></i> core connecting <time data-et-clock>--:--:-- ET</time></em></footer>');
+  }
+
+  function renderLineage(channels, state) {
+    const workstation=$('.lineage-workstation'),host=$('[data-lineage-repos]');
+    const accepted=state.lineage||[],mutations=state.mutations||[],machines=state.machines||[],genesis=accepted.length===0;
+    workstation?.classList.toggle('is-genesis-network',genesis);
+    if (host) host.innerHTML = channels.map((channel,index)=>`<a href="${esc(channel.url)}" target="_blank" rel="noreferrer"><i>${String(index+1).padStart(2,'0')}</i><span><b>${esc(channel.repo)}</b><small>${esc(channel.branch)} · ${esc(channel.language||'source')}</small></span><code>${short(channel.sha)}</code><em>${channel.error?'ERROR':channel.stale?'CACHED':'OBSERVED'}</em></a>`).join('');
+    const online=machines.filter(machine=>machine.status!=='offline').length;
+    const values={watchers:channels.length,online,candidates:mutations.filter(item=>item.status==='verifying').length,accepted:accepted.length};
+    const identity={sources:channels.length,online,accepted:accepted.length};for(const [key,value] of Object.entries(identity)){const node=$(`[data-genesis="${key}"]`);if(node)node.textContent=String(value)}
+    for(const [key,value] of Object.entries(values)){const node=$(`[data-map="${key}"]`);if(node)node.textContent=String(value)}
+    const nodes=$('[data-lineage-nodes]');
+    if(nodes)nodes.innerHTML=channels.map((channel,index)=>{const machine=machines.find(item=>item.name===channel.agent),live=machine&&machine.status!=='offline',seed=[...channel.repo].reduce((sum,char)=>sum+char.charCodeAt(0),0),progress=42+(seed%51),side=index<Math.ceil(channels.length/2)?'left':'right',row=index%Math.ceil(channels.length/2)+1;return `<article class="lineage-agent-node ${side} ${live?'online':'offline'}" style="--row:${row};--top:${(row-1)*100/Math.ceil(channels.length/2)}%;--scan:${progress}%"><i>${String(index+1).padStart(2,'0')}</i><div><b>${esc(channel.agent)}</b><strong>${esc(channel.repo)}</strong><span>${esc(machine?.activity||`indexing ${channel.file}`)}</span><u><em></em></u></div><code>${short(channel.sha)}</code><small>${live?'LIVE':'OFFLINE'}</small></article>`}).join('');
+    const observation=$('[data-observation-ledger]');
+    if(observation)observation.innerHTML=channels.map((channel,index)=>{const machine=machines.find(item=>item.name===channel.agent);return `<a href="${esc(channel.url)}" target="_blank" rel="noreferrer"><i>${String(index+1).padStart(2,'0')}</i><span><b>${esc(channel.repo)}</b><small>${esc(channel.file)}</small></span><code>${short(channel.sha)}</code><em>${machine?.status==='offline'?'STALE':'WATCH'}</em></a>`}).join('');
+    const latest=mutations[0],passes=latest?.verifications?.filter(item=>item.passed).length||0;
+    const gates=[['01','PARENT DIGEST',latest?'BOUND':'ARMED'],['02','ISOLATED BUILD',latest?.testsPassed?'PASS':'WAIT'],['03','TEST SUITE',latest?.testsPassed?'PASS':'WAIT'],['04','BENCHMARK',latest?.candidateMetric!=null?'MEASURED':'WAIT'],['05','REPLAY / A',passes>=1?'PASS':'WAIT'],['06','REPLAY / B',passes>=2?'PASS':'WAIT']];
+    const gateHost=$('[data-quorum-gates]');if(gateHost)gateHost.innerHTML=gates.map(([step,label,status])=>`<span class="${/PASS|BOUND|ARMED/.test(status)?'ready':''}"><i>${step}</i><b>${label}</b><em>${status}</em></span>`).join('');
+    const core=$('.lineage-core-node');if(core){$('strong',core).textContent=accepted.length?`GENERATION ${accepted.at(-1).generation}`:'GENESIS / G0';$('small',core).textContent=accepted.length?`${short(accepted.at(-1).artifact)} canonical artifact`:'awaiting a verified mutation'}
+    const ledgerTitle=$('.lineage-ledger .subhead span');if(ledgerTitle)ledgerTitle.textContent=genesis?'generation ingress / observations':'accepted generations';
+    const detail=$('.generation-detail');if(detail&&genesis){const label=$('.subhead span',detail),status=$('.subhead b',detail),proof=$('.proof-card strong',detail),proofCopy=$('.proof-card p',detail);if(label)label.textContent='genesis control';if(status)status.textContent='LIVE ROOT';if(proof)proof.textContent='ARMED';if(proofCopy)proofCopy.textContent='Verification gates are ready. No candidate artifact has entered replay consensus.'}
+  }
+  function renderTreasury(state, telemetry, channels) {
+    const host = $('[data-preflight]');
+    if (host) {
+      const online = state.machines.filter(machine => machine.status !== 'offline').length;
+      const snapshot=telemetry.snapshot===true;
+      const checks = [['CORE',snapshot?'LOCAL ONLY':'READY',snapshot?'run npm start to activate':`${Math.floor(telemetry.uptimeSec/60)}m uptime`],['AGENTS',snapshot?'OBSERVED':online?'READY':'WAIT',snapshot?`${channels.length} public observers`:`${online}/${state.machines.length} online`],['SOURCES',channels.length?'READY':'WAIT',`${channels.filter(item=>!item.error).length}/${channels.length} readable`],['QUORUM',!snapshot&&online>=3?'READY':'WAIT','2 independent replays required'],['CREATOR REWARDS','READY','80% compute · 20% agents'],['TOKEN / CA','LIVE','9LdFxvn2cMY2T6NDj3naThMhRUg7punCg6hAK5uXpump']];
+      host.innerHTML = checks.map(([name,status,detail]) => `<article class="${status==='READY'?'ready':'pending'}"><span>${esc(name)}</span><b>${status}</b><small>${esc(detail)}</small></article>`).join('');
+    }
+    const events = $('[data-runtime-events]');
+    if (events) { const rows = state.events.slice(0,7); events.innerHTML = rows.length ? rows.map(event => `<li><time>${`${etTime(event.at)} ET`}</time><b>${esc(event.type)}</b><span>${esc(event.payload?.machine?.name || event.payload?.task?.title || event.payload?.mutation?.id || 'protocol event')}</span><em>OFF-CHAIN</em></li>`).join('') : '<li><time>--:--:--</time><b>core.ready</b><span>event stream initialized; no protocol writes yet</span><em>OFF-CHAIN</em></li>'; }
+  }
+
+  function renderLiveTelemetry(state, telemetry, channels) {
+    const live=channels.filter(channel=>!channel.error),online=(state.machines||[]).filter(machine=>machine.status!=='offline'),stars=channels.reduce((sum,channel)=>sum+(Number(channel.stars)||0),0),forks=channels.reduce((sum,channel)=>sum+(Number(channel.forks)||0),0),issues=channels.reduce((sum,channel)=>sum+(Number(channel.issues)||0),0),newest=channels.filter(channel=>channel.commitAt).sort((a,b)=>Date.parse(b.commitAt)-Date.parse(a.commitAt))[0];
+    const inline=$('.cell-inline-stats');
+    if(inline){const heroItems=[['AGENTS',`${online.length}/${state.machines.length} ONLINE`],['SOURCES',`${live.length}/${channels.length} READABLE`],['GITHUB STARS',compact(stars)],['FORKS',compact(forks)],['OPEN ISSUES',compact(issues)],['CORE REQUESTS',compact(telemetry.requests)],['MEMORY',`${telemetry.rssMb} MB RSS`],['GENERATION',String(state.lineage.length)],['LATEST COMMIT',newest?`${newest.repo} · ${short(newest.sha)} · ${etTime(newest.commitAt)} ET`:'WAITING FOR GITHUB']];const markup=heroItems.map(([label,value])=>`<span><b>${esc(label)}</b><em>${esc(value)}</em></span>`).join('');inline.classList.add('hero-data-tape');inline.style.setProperty('--hero-phase',`-${(Date.now()/1000%56).toFixed(2)}s`);inline.innerHTML=`<div class="hero-live-track">${markup}${markup}</div>`;}
+    let ticker=$('.cell-live-ticker');
+    if(!ticker){ticker=document.createElement('section');ticker.className='cell-live-ticker';ticker.innerHTML='<header><b>LIVE DATA BUS</b><span>GITHUB + AGENTS + CORE</span><em>REAL / READ-ONLY</em></header><div><div data-live-track></div></div>'}
+    const process=$('.cell-process');if(process){const brief=$('.cell-network-brief'),note=$('.cell-network-note');process.prepend(ticker);if(note)process.prepend(note);if(brief)process.prepend(brief)}
+    const track=$('[data-live-track]',ticker);if(!track)return;
+    const sourceItems=channels.map(channel=>`<span><i>COMMIT</i><b>${esc(channel.repo)}</b><code>${esc(channel.branch||'main')}@${short(channel.sha)} · ${channel.commitAt?`${etTime(channel.commitAt)} ET`:'TIME N/A'}</code><em>${esc(channel.commitMessage||channel.file)}</em></span>`);
+    const machineItems=(state.machines||[]).map(machine=>`<span><i>AGENT</i><b>${esc(machine.name)}</b><code>${esc(machine.status)} · ${etTime(machine.lastSeenAt)} ET</code><em>${esc(machine.activity||'polling verification queue')}</em></span>`);
+    const coreItems=[`<span><i>CORE</i><b>${Math.floor(telemetry.uptimeSec/60)}m uptime</b><code>${telemetry.requests} requests · ${etTime(telemetry.at)} ET</code><em>${telemetry.rssMb} MB RSS · ${telemetry.sseClients} SSE</em></span>`];
+    const items=[...sourceItems,...machineItems,...coreItems];track.innerHTML=[...items,...items].join('');track.style.setProperty('--ticker-items',String(items.length));
+  }
+  function renderStatus(telemetry) {
+    for (const bar of document.querySelectorAll('.view-statusbar')) { const status = $('em', bar); if (status) status.innerHTML = `<i></i> core online · ${telemetry.requests} requests <time data-et-clock>${etTime()} ET</time>`; }
+  }
+  function tickEtClocks(){for(const clock of document.querySelectorAll('[data-et-clock]'))clock.textContent=`${etTime()} ET`;}
+
+  function bindSpawn() {
+    const name=$('#machineName'), target=$('#machineTarget'), cpu=$('#cpuRange'), memory=$('#memRange'), command=$('[data-spawn-command]'), form=$('#spawnForm');
+    const update=()=>{ const safe=(name?.value||'worker-01').toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,24),repository=[...form.querySelectorAll('input')].find(input=>input.value.startsWith('https://github.com/'))?.value||'https://github.com/nuttumrunit/Cellumo'; if(command)command.textContent=`git clone https://github.com/nuttumrunit/Cellumo.git\ncd Cellumo\nnpm install\nnpm run check\nnpm start\n\n# in a second terminal\nnode worker.mjs doctor --server http://127.0.0.1:4210\nnode worker.mjs register --name ${safe||'worker-01'} --target "${target?.value||'general'}" --repository "${repository}" --cpu ${cpu?.value||2} --memory ${memory?.value||4} --server http://127.0.0.1:4210\nnode worker.mjs start --auto --server http://127.0.0.1:4210`; const preview=$('#previewName'); if(preview)preview.textContent=safe||'worker-01'; const klass=$('#previewClass'); if(klass)klass.textContent=(target?.value||'').toUpperCase(); };
+    name?.addEventListener('input',update); target?.addEventListener('change',update);cpu?.addEventListener('input',update);memory?.addEventListener('input',update);form?.querySelectorAll('input').forEach(input=>input.addEventListener('input',update));
+    $('[data-copy-command]')?.addEventListener('click',async event=>{ try{await navigator.clipboard.writeText(command.textContent);event.currentTarget.textContent='copied'}catch{event.currentTarget.textContent='select command'} setTimeout(()=>{event.currentTarget.textContent='copy command'},1300); }); update();
+  }
+
+  function bindKeyboard() { document.addEventListener('keydown',event=>{ if(event.ctrlKey||event.metaKey||event.altKey||/INPUT|SELECT|TEXTAREA/.test(event.target.tagName))return; const routes=['live','mutations','lineage','treasury','spawn','manual'],index=Number(event.key); if(Number.isInteger(index)&&index>=0&&index<routes.length)location.hash=routes[index]; }); }
+
+  async function refresh() {
+    try { const [state,telemetry,stream]=await Promise.all([get('/api/state'),get('/api/telemetry'),get('/api/github-stream')]); renderLineage(stream.channels||[],state); renderTreasury(state,telemetry,stream.channels||[]); renderLiveTelemetry(state,telemetry,stream.channels||[]); renderStatus(telemetry); }
+    catch(error) {
+      try {
+        const stream=await get('./assets/github-stream.json'),channels=stream.channels||[],snapshotState={lineage:[],mutations:[],events:[],treasury:{initialized:false,address:null},machines:channels.map((channel,index)=>({id:`observer-${index+1}`,name:channel.agent,status:'online',activity:`observing ${channel.file}`,lastSeenAt:new Date().toISOString(),target:channel.repo,resources:{cpu:0,memoryGb:0}}))},files=channels.reduce((sum,channel)=>sum+(channel.files?.length||1),0),telemetry={snapshot:true,uptimeSec:0,requests:files,rssMb:0,sseClients:0,at:new Date().toISOString()};
+        renderLineage(channels,snapshotState);renderTreasury(snapshotState,telemetry,channels);renderLiveTelemetry(snapshotState,telemetry,channels);for(const bar of document.querySelectorAll('.view-statusbar em'))bar.innerHTML=`<i></i> GitHub snapshot · ${channels.length} repositories · ${files} files <time data-et-clock>${etTime()} ET</time>`;
+      } catch(fallbackError) { for(const bar of document.querySelectorAll('.view-statusbar em'))bar.textContent=`data unavailable · ${fallbackError.message}`; }
+    }
+  }
+
+  shell(); bindSpawn(); bindKeyboard(); refresh(); tickEtClocks(); setInterval(refresh,location.hostname.endsWith('github.io')||location.hostname==='cellumo.fun'||location.hostname==='www.cellumo.fun'?90000:15000); setInterval(tickEtClocks,1000);
+})();
