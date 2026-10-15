@@ -216,3 +216,36 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .brand-logo img{object-fit:contain!important}
 @media(min-width:1051px){.brand-logo img{width:44px!important;height:44px!important}}
 @media(max-width:1050px){.brand-logo img{width:42px!important;height:42px!important}}
+
+/* Precision navigation bar. */
+.topbar{height:52px!important;background:#000!important;backdrop-filter:none!important;box-shadow:none!important;border-color:#1b281f!important}
+.topbar nav{min-width:0;align-items:stretch}
+.topbar nav a{position:relative;min-width:0;justify-content:center;padding:0 clamp(11px,1vw,17px)!important;color:#7e8b84!important;border-color:#1b281f!important;font-size:10px;letter-spacing:.015em;background:#000!important}
+.topbar nav a:before{content:"";position:absolute;right:50%;bottom:-1px;left:50%;height:1px;background:var(--acid);transition:right .2s ease,left .2s ease}
+.topbar nav a:hover{color:#dfe8e2!important;background:#020603!important}
+.topbar nav a.active{color:var(--acid)!important;background:#020603!important}
+.topbar nav a.active:before{right:13px;left:13px}
+.brand{height:52px;border-color:#1b281f!important;background:#000}
+.header-actions{height:52px;align-items:stretch;border-left:1px solid #1b281f}
+.header-actions>*{border-color:#1b281f!important}
+.header-actions .ca{display:grid;min-width:72px!important;grid-template-columns:auto auto;place-content:center;gap:7px;padding:0 12px!important;background:#000}
+.header-actions .ca small{color:#455249;font-size:6px;letter-spacing:.12em}
+.header-actions .ca b{color:#9da9a1;font-size:8px;font-weight:500;letter-spacing:.06em}
+.social-cluster{display:flex!important;padding:0!important;border-left:1px solid #1b281f!important}
+.header-actions .social-icon{display:grid;width:43px;padding:0!important;place-items:center;color:#9ba79f!important;border-left:0!important;border-right:1px solid #1b281f!important;background:#000}
+.social-icon svg{width:15px;height:15px;overflow:visible;fill:currentColor}
+.social-hf svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.social-hf svg path:first-child{fill:none}
+.header-actions .social-icon:hover{color:var(--acid)!important;background:#030803!important}
+.header-actions .deploy-link{justify-content:center;min-width:116px;padding:0 14px!important;color:#aeb9b2!important;background:#000}
+.header-actions .deploy-link:hover{color:var(--acid)!important;background:#030803}
+.header-actions>button{display:flex;min-width:122px;align-items:center;justify-content:center;gap:9px;padding:0 14px!important;color:#dfe7e2!important;background:#050806!important}
+.header-actions>button>i{position:relative;width:13px;height:11px;border:1px solid #6e7b73}
+.header-actions>button>i:after{content:"";position:absolute;top:3px;right:-3px;width:4px;height:3px;border:1px solid var(--acid);background:#050806}
+.header-actions>button>span{font:500 9px var(--mono);white-space:nowrap}
+.header-actions>button:hover{color:#000!important;background:var(--acid)!important}
+.header-actions>button:hover>i{border-color:#000}.header-actions>button:hover>i:after{border-color:#000;background:var(--acid)}
+.header-actions .buy-cell{min-width:110px;justify-content:center;padding:0 14px!important;font-size:9px;white-space:nowrap}
+@media(min-width:1051px){.topbar{grid-template-columns:72px minmax(470px,1fr) auto!important}.brand{padding:0 13px!important}}
+@media(max-width:1240px) and (min-width:1051px){.topbar nav a{padding:0 10px!important;font-size:9px}.header-actions .deploy-link{display:none}.header-actions>button{min-width:108px;padding-inline:10px!important}.header-actions .buy-cell{min-width:98px;padding-inline:10px!important}}
+@media(max-width:1050px){.topbar{grid-template-columns:72px minmax(0,1fr)!important}.brand{justify-content:center!important;padding:0 12px!important}.brand>span:last-child{display:none}.header-actions{display:none}.topbar nav{overflow-x:auto;scrollbar-width:none}.topbar nav::-webkit-scrollbar{display:none}.topbar nav a{flex:1 0 84px!important}}
