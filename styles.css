@@ -458,7 +458,6 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 @media(max-width:1050px){.monitor-panel{min-height:260px}.home-data-grid{grid-auto-rows:minmax(300px,1fr)!important}.monitor-empty{min-height:84px}}
 
 /* Dense instrument matrix — derived from the supplied scientific console reference. */
-.legacy-home-data-grid{display:none!important}
 body[data-signal="empty"] .particle-field path,body[data-signal="empty"] .field-bars{display:none}
 body[data-signal="empty"] .particle-field:after{content:"NO ROUTED PACKET";position:absolute;inset:0;display:grid;place-items:center;color:#435047;font:500 7px var(--mono);letter-spacing:.12em}
 body[data-signal="empty"] .index-cells i{background:transparent!important;opacity:1!important}
