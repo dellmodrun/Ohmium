@@ -24,27 +24,26 @@
     </div>
   </section>
   <section class="home-data-grid instrument-grid" aria-label="Ohmium live network instruments">
-    <article class="instrument-panel solver-instrument" aria-label="Signal particle solver">
-      <header>Signal / Particle Solver <b data-solver-mode>CONNECTING</b></header>
-      <div class="particle-field"><svg data-particle-field viewBox="0 0 320 118" preserveAspectRatio="none" aria-label="Core request flow field"></svg></div>
-      <div class="solver-register"><span><b>REQUESTS</b><em data-core-requests>—</em></span><span><b>OPEN TASKS</b><em data-input-queue>—</em></span><span><b>CORE UPTIME</b><em data-core-uptime>—</em></span></div>
+    <article class="instrument-panel thermal-instrument" aria-label="Core load heatmap">
+      <header>Core Load / Thermal Field <b data-thermal-mode>CONNECTING</b></header>
+      <div class="thermal-stage"><svg data-thermal-map viewBox="0 0 360 150" preserveAspectRatio="none" aria-label="Live Core load heatmap"></svg><aside><span>HIGH</span><i></i><span>LOW</span></aside></div>
+      <footer><span>Requests <b data-core-requests>—</b></span><span>Memory <b data-core-memory>—</b></span><span>Uptime <b data-core-uptime>—</b></span></footer>
     </article>
-    <article class="instrument-panel field-instrument" aria-label="Shared state difference field">
-      <header>Shared State / Difference Field <b data-field-mode>CONNECTING</b></header>
-      <div class="field-pair"><div><span>REGISTRY REFERENCE</span><i class="field-matrix" data-field-matrix="reference"></i></div><div><span>LIVE EVENT FIELD</span><i class="field-matrix" data-field-matrix="event"></i></div></div>
-      <div class="field-bars" data-field-bars aria-label="Absolute state difference"></div>
-      <footer><span>Absolute state delta</span><b data-field-delta>—</b></footer>
+    <article class="instrument-panel activity-instrument" aria-label="Network work activity heatmap">
+      <header>Network Work / Activity Grid <b data-activity-mode>CONNECTING</b></header>
+      <div class="activity-chart"><div class="activity-axis"><span>−196s</span><span>−98s</span><span>Now</span></div><div class="activity-grid" data-activity-grid></div><div class="activity-legend"><span>Less</span><i></i><i></i><i></i><i></i><i></i><span>More</span></div></div>
+      <footer><span data-activity-summary>Waiting for Core samples</span><b><i data-network-online>0</i> online</b></footer>
     </article>
-    <article class="instrument-panel validation-instrument" aria-label="Validation sample buffer">
-      <header>Validation / Sample Buffer <b data-proof-mode>CONNECTING</b></header>
-      <div class="wave-stack"><p><span>REQUEST RATE</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="requests" d="M0 14H220"/></svg></p><p><span>MEMORY</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="memory" d="M0 14H220"/></svg></p><p><span>PROOF LOAD</span><svg viewBox="0 0 220 28" preserveAspectRatio="none"><path data-wave="proofs" d="M0 14H220"/></svg></p></div>
-      <footer><span data-proof-id>Proof —</span><b data-proof-hash>Hash —</b><i data-proof-verifiers>0 verifiers</i><em data-proof-time>—</em></footer><div hidden data-proof-zero></div>
+    <article class="instrument-panel market-instrument" aria-label="Runtime memory candlestick chart">
+      <header>Runtime / Memory OHLC <b data-market-mode>CONNECTING</b></header>
+      <div class="market-stage"><svg data-candle-chart viewBox="0 0 360 166" preserveAspectRatio="none" aria-label="Core memory candlestick chart"></svg></div>
+      <footer><span>O <b data-ohlc="open">—</b></span><span>H <b data-ohlc="high">—</b></span><span>L <b data-ohlc="low">—</b></span><span>C <b data-ohlc="close">—</b></span></footer>
     </article>
-    <article class="instrument-panel index-instrument" aria-label="Agent reference index">
-      <header>Agent / Reference Index <b data-network-mode>CONNECTING</b></header>
-      <div class="index-head"><span>AGENT</span><span>16-SAMPLE STATE FIELD</span><span>MODE</span></div>
-      <div class="index-body" data-component-index></div>
-      <footer><span data-network-foot>Waiting for verified Core state</span><b><i data-network-components>—</i> owner agents</b><em data-network-treasury>—</em><i hidden data-network-rewards>—</i></footer>
+    <article class="instrument-panel updates-instrument" aria-label="Timestamped Core updates">
+      <header>Core / Timestamped Updates <b data-network-mode>CONNECTING</b></header>
+      <div class="updates-head"><span>TIME</span><span>CHANNEL</span><span>UPDATE</span><span>STATE</span></div>
+      <ol class="updates-list" data-update-feed><li><time>--:--:--</time><b>CORE</b><span>Waiting for verified telemetry</span><em>—</em></li></ol>
+      <footer><span data-network-foot>Waiting for verified Core state</span><b><i data-network-components>—</i> owner agents</b><i hidden data-network-treasury>—</i><i hidden data-network-rewards>—</i><i hidden data-proof-id>Proof —</i><i hidden data-proof-hash>Hash —</i><i hidden data-proof-verifiers>0 verifiers</i><i hidden data-proof-time>—</i></footer>
     </article>
   </section>
   <footer class="cell-status"><span><b>Ohmium</b> · Agent circuit</span><em><i></i> Connecting&nbsp;&nbsp; <time id="clock">--:--:-- ET</time></em></footer>
