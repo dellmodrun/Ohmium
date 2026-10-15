@@ -289,3 +289,22 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 /* Active navigation is typographic only — no indicator bar. */
 .topbar nav a:after,.topbar nav a.active:after{content:none!important;display:none!important;background:none!important;box-shadow:none!important}
 .topbar nav a.active{color:#f3f7f4!important;font-weight:500}
+
+/* Remove every click/focus indicator from navigation links. */
+.topbar nav a,.topbar nav a:hover,.topbar nav a:active,.topbar nav a:focus,.topbar nav a:focus-visible,.topbar nav a.active{border-bottom:0!important;outline:0!important;box-shadow:none!important;text-decoration:none!important}
+.topbar nav a:before,.topbar nav a:after,.topbar nav a:active:before,.topbar nav a:active:after,.topbar nav a:focus:before,.topbar nav a:focus:after,.topbar nav a.active:before,.topbar nav a.active:after{content:none!important;display:none!important}
+
+/* Readable contract label and matched monochrome social marks. */
+.header-actions .ca{min-width:94px!important;gap:10px!important;padding:0 17px!important}
+.header-actions .ca small{color:#aeb9b2!important;font-size:11px!important;font-weight:500;letter-spacing:.04em!important}
+.header-actions .ca b{color:#f0f4f1!important;font-size:11px!important;font-weight:600!important;letter-spacing:.04em!important}
+.social-icon svg,.social-hf img{width:16px!important;height:16px!important}
+.social-hf img{filter:grayscale(1) brightness(.88) contrast(1.12)!important;opacity:.78}
+.header-actions .social-hf:hover img{filter:grayscale(1) brightness(1.45)!important;opacity:1}
+@media(max-width:1260px) and (min-width:1051px){.header-actions .ca{min-width:82px!important;padding-inline:13px!important}}
+
+/* One social group, one centered divider. */
+.social-cluster{position:relative!important;display:grid!important;width:96px!important;grid-template-columns:1fr 1fr!important;border-left:1px solid #223027!important;border-right:1px solid #223027!important}
+.social-cluster:after{content:"";position:absolute;top:50%;left:50%;width:1px;height:18px;background:#223027;transform:translate(-.5px,-50%);pointer-events:none}
+.header-actions .social-icon{width:auto!important;border:0!important}
+@media(max-width:1260px) and (min-width:1051px){.social-cluster{width:84px!important}}
