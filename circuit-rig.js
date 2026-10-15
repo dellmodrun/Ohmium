@@ -21,6 +21,96 @@
   };
   let selected = "core";
   let latestData = null;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const view = { x: 0, y: innerWidth <= 680 ? -18 : -34, scale: 1, tx: 0, ty: innerWidth <= 680 ? -18 : -34, ts: 1, frame: 0, last: 0, visible: true, dragging: false, moved: false };
+
+  function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+  function limits() {
+    const rect = mount.getBoundingClientRect();
+    return { x: Math.max(50, rect.width * .34), y: Math.max(45, rect.height * .3) };
+  }
+  function drawView() {
+    mount.style.setProperty("--rig-x", `${view.x.toFixed(2)}px`);
+    mount.style.setProperty("--rig-y", `${view.y.toFixed(2)}px`);
+    mount.style.setProperty("--rig-scale", view.scale.toFixed(4));
+  }
+  function tick(now) {
+    const dt = view.last ? Math.min((now - view.last) / 1000, 1 / 30) : 1 / 60;
+    view.last = now;
+    const follow = still.matches ? 1 : 1 - Math.exp(-dt / (view.dragging ? .075 : .14));
+    view.x += (view.tx - view.x) * follow;
+    view.y += (view.ty - view.y) * follow;
+    view.scale += (view.ts - view.scale) * follow;
+    drawView();
+    const moving = Math.abs(view.tx - view.x) > .05 || Math.abs(view.ty - view.y) > .05 || Math.abs(view.ts - view.scale) > .0005;
+    view.frame = view.visible && moving ? requestAnimationFrame(tick) : 0;
+  }
+  function runView() {
+    if (!view.frame && view.visible) { view.last = 0; view.frame = requestAnimationFrame(tick); }
+  }
+  function resetView() {
+    view.tx = 0;
+    view.ty = innerWidth <= 680 ? -18 : -34;
+    view.ts = 1;
+    runView();
+  }
+
+  let dragStart = null;
+  mount.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    view.dragging = true;
+    view.moved = false;
+    dragStart = { x: event.clientX, y: event.clientY, tx: view.tx, ty: view.ty };
+    mount.classList.add("is-dragging");
+    mount.setPointerCapture(event.pointerId);
+  });
+  mount.addEventListener("pointermove", (event) => {
+    if (!view.dragging || !dragStart) return;
+    const dx = event.clientX - dragStart.x;
+    const dy = event.clientY - dragStart.y;
+    if (Math.hypot(dx, dy) > 3) view.moved = true;
+    const bound = limits();
+    view.tx = clamp(dragStart.tx + dx, -bound.x, bound.x);
+    view.ty = clamp(dragStart.ty + dy, -bound.y, bound.y);
+    runView();
+  });
+  const endDrag = (event) => {
+    if (!view.dragging) return;
+    view.dragging = false;
+    dragStart = null;
+    mount.classList.remove("is-dragging");
+    if (mount.hasPointerCapture(event.pointerId)) mount.releasePointerCapture(event.pointerId);
+  };
+  mount.addEventListener("pointerup", endDrag);
+  mount.addEventListener("pointercancel", endDrag);
+  mount.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    view.ts = clamp(view.ts * Math.exp(-event.deltaY * .001), .72, 1.65);
+    runView();
+  }, { passive: false });
+  mount.addEventListener("dblclick", resetView);
+  mount.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 54 : 24;
+    if (event.key === "ArrowLeft") view.tx -= step;
+    else if (event.key === "ArrowRight") view.tx += step;
+    else if (event.key === "ArrowUp") view.ty -= step;
+    else if (event.key === "ArrowDown") view.ty += step;
+    else if (event.key === "+" || event.key === "=") view.ts = clamp(view.ts + .1, .72, 1.65);
+    else if (event.key === "-" || event.key === "_") view.ts = clamp(view.ts - .1, .72, 1.65);
+    else if (event.key === "Home" || event.key === "Escape") resetView();
+    else return;
+    const bound = limits();
+    view.tx = clamp(view.tx, -bound.x, bound.x);
+    view.ty = clamp(view.ty, -bound.y, bound.y);
+    event.preventDefault();
+    runView();
+  });
+  one("[data-circuit-rig-reset]")?.addEventListener("click", resetView);
+  new IntersectionObserver((entries) => {
+    view.visible = entries[entries.length - 1].isIntersecting;
+    if (view.visible) runView();
+  }, { rootMargin: "120px 0px" }).observe(mount);
+  drawView();
 
   function statusFor(key) {
     if (!latestData?.online || key === "core") return latestData?.online ? "CONNECTED" : "CORE STATE UNAVAILABLE";
@@ -69,7 +159,7 @@
 
   all("[data-model-component]").forEach((button) => {
     button.addEventListener("click", () => select(button.dataset.modelComponent));
-    button.addEventListener("pointerenter", () => select(button.dataset.modelComponent));
+    button.addEventListener("pointerenter", () => { if (!view.dragging) select(button.dataset.modelComponent); });
   });
 
   fetch("./assets/ohmium-signal-backplane.svg?v=1")
@@ -81,10 +171,10 @@
       mount.innerHTML = markup;
       set("[data-circuit-part-count]", String(mount.querySelectorAll(".part").length));
       mount.querySelectorAll("[data-component]").forEach((node) => {
-        const choose = () => select(node.dataset.component);
+        const choose = () => { if (!view.dragging && !view.moved) select(node.dataset.component); };
         node.addEventListener("click", choose);
         node.addEventListener("focus", choose);
-        node.addEventListener("pointerenter", choose);
+        node.addEventListener("pointerenter", () => { if (!view.dragging) select(node.dataset.component); });
       });
       select("core");
       if (latestData) render(latestData);
