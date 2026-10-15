@@ -19,6 +19,9 @@ try {
   await call(`/api/tasks/${task.id}/claim`, "POST", {}, workers[0].secret);
   const patch = "diff --git a/src/hot.rs b/src/hot.rs\n--- a/src/hot.rs\n+++ b/src/hot.rs\n@@ -1 +1 @@\n-old\n+new\n", patchDigest = createHash("sha256").update(patch).digest("hex");
   const submitted = await call("/api/mutations", "POST", { taskId: task.id, patch, patchDigest, summary: "automated consensus test", baselineMetric: 100, candidateMetric: 90, testsPassed: true }, workers[0].secret);
+  if ((await fetch(`${base}/api/mutations/${submitted.mutation.id}`)).status !== 401) throw new Error("mutation patch must require worker authentication");
+  const privateMutation = await call(`/api/mutations/${submitted.mutation.id}`, "GET", undefined, workers[1].secret);
+  if (privateMutation.mutation.patch !== patch) throw new Error("authenticated verifier could not retrieve the exact patch");
   await call(`/api/mutations/${submitted.mutation.id}/verify`, "POST", { observedBaselineMetric: 101, observedMetric: 91, testsPassed: true }, workers[1].secret);
   const accepted = await call(`/api/mutations/${submitted.mutation.id}/verify`, "POST", { observedBaselineMetric: 99.5, observedMetric: 89.8, testsPassed: true }, workers[2].secret);
   if (accepted.mutation.status !== "accepted" || accepted.mutation.generation !== 1) throw new Error("mutation did not enter generation 1");

@@ -1,0 +1,10 @@
+.git
+.edge-qa
+.env
+.ohmium-worker.json
+data
+node_modules
+source-index.json
+*.log
+*.png
+!assets/*.png

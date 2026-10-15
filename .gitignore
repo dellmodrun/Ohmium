@@ -5,3 +5,4 @@ data/state.json.tmp
 agents/*/.ohmium-worker.json
 agents/*/agent.log
 agents/pids.json
+source-index.json

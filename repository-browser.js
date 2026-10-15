@@ -1,17 +1,14 @@
 (() => {
-  const owner = "nuttumrunit", repository = "Ohmium";
-  const api = `https://api.github.com/repos/${owner}/${repository}`;
   const one = (selector, root = document) => root.querySelector(selector);
   const set = (selector, value) => { const node = one(selector); if (node) node.textContent = value; };
   const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   const formatBytes = (bytes = 0) => bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : bytes >= 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} B`;
-  const binary = (path) => /\.(png|jpe?g|gif|webp|ico|woff2?|ttf|mp4|zip|pdf)$/i.test(path);
-  const request = async (url, json = true) => { const response = await fetch(url, { headers: { accept: json ? "application/vnd.github+json" : "text/plain" }, cache: "no-store" }); if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status}`); return json ? response.json() : response.text(); };
 
   function inlineMarkdown(value) {
     return escapeHtml(value)
+      .replace(/!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g, '<img class="readme-badge" src="$2" alt="$1" loading="lazy">')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<span class="readme-link" title="$2">$1</span>')
       .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   }
 
@@ -28,79 +25,66 @@
       if (line.trim()) output.push(`<p>${inlineMarkdown(line)}</p>`);
     }
     if (listOpen) output.push("</ul>");
-    if (inCode) output.push("</code></pre>");
     return output.join("");
   }
 
-  function buildTree(items) {
-    const root = { children: new Map() };
-    for (const item of items) {
-      const parts = item.path.split("/"); let cursor = root;
-      parts.forEach((part, index) => {
-        if (!cursor.children.has(part)) cursor.children.set(part, { name: part, path: parts.slice(0, index + 1).join("/"), type: index === parts.length - 1 ? item.type : "tree", size: item.size || 0, children: new Map() });
-        cursor = cursor.children.get(part);
-      });
+  function nested(files) {
+    const root = {};
+    for (const file of files) {
+      const parts = file.path.split("/"); let cursor = root;
+      parts.forEach((part, index) => { if (index === parts.length - 1) cursor[part] = file; else cursor = cursor[part] ||= {}; });
     }
     return root;
   }
 
-  function treeMarkup(node, depth = 0) {
-    const children = [...node.children.values()].sort((left, right) => left.type === right.type ? left.name.localeCompare(right.name) : left.type === "tree" ? -1 : 1);
-    return children.map((child) => {
-      if (child.type === "tree") return `<details ${depth < 1 ? "open" : ""}><summary><i>⌄</i><span>${escapeHtml(child.name)}</span></summary><div>${treeMarkup(child, depth + 1)}</div></details>`;
-      return `<button type="button" data-repo-file="${escapeHtml(child.path)}" data-repo-size="${child.size}"><i>·</i><span>${escapeHtml(child.name)}</span><em>${formatBytes(child.size)}</em></button>`;
+  function treeMarkup(node, prefix = "") {
+    return Object.entries(node).sort(([left, a], [right, b]) => {
+      const aFolder = !a.path, bFolder = !b.path;
+      return aFolder === bFolder ? left.localeCompare(right) : aFolder ? -1 : 1;
+    }).map(([name, value]) => {
+      const path = prefix ? `${prefix}/${name}` : name;
+      if (!value.path) return `<details open><summary><i>+</i><span>${escapeHtml(name)}</span></summary><div>${treeMarkup(value, path)}</div></details>`;
+      return `<button type="button" data-source-path="${escapeHtml(value.path)}"><i>${value.content === null ? "◇" : "·"}</i><span>${escapeHtml(name)}</span><em>${formatBytes(value.size)}</em></button>`;
     }).join("");
   }
 
-  function showCode(path, source, size, branch, updatedAt) {
-    set("[data-code-path]", path);
-    set("[data-code-size]", formatBytes(size));
-    set("[data-code-state]", "Source loaded from GitHub");
-    set("[data-code-updated]", updatedAt ? `Repository updated ${new Date(updatedAt).toLocaleString([], { hour12: false })}` : "Current public revision");
-    const link = one("[data-code-source]");
-    if (link) link.href = `https://github.com/${owner}/${repository}/blob/${encodeURIComponent(branch)}/${path.split("/").map(encodeURIComponent).join("/")}`;
-    const lines = one("[data-code-lines]");
-    if (!lines) return;
-    lines.replaceChildren();
-    source.split(/\r?\n/).forEach((line) => { const item = document.createElement("li"), code = document.createElement("code"); code.textContent = line || " "; item.append(code); lines.append(item); });
-    one("[data-repository-tree] .selected")?.classList.remove("selected");
-    one(`[data-repo-file="${CSS.escape(path)}"]`)?.classList.add("selected");
-  }
-
-  async function loadFile(path, size, branch, updatedAt) {
-    set("[data-code-state]", "Fetching source from GitHub…");
-    if (binary(path) || size > 500000) { showCode(path, "Binary or oversized file. Open it on GitHub to inspect the original asset.", size, branch, updatedAt); set("[data-code-state]", "Source preview unavailable"); return; }
-    try {
-      const source = await request(`https://raw.githubusercontent.com/${owner}/${repository}/${encodeURIComponent(branch)}/${path.split("/").map(encodeURIComponent).join("/")}`, false);
-      showCode(path, source, size || new Blob([source]).size, branch, updatedAt);
-    } catch (error) { set("[data-code-state]", error.message); }
+  function sourceLines(file) {
+    if (file.content === null) return `<li><code>Binary asset · ${formatBytes(file.size)} · source preview is not applicable.</code></li>`;
+    return file.content.split(/\r?\n/).map((line) => `<li><code>${escapeHtml(line) || " "}</code></li>`).join("");
   }
 
   async function mount() {
     const host = one("[data-repository-tree]");
     if (!host) return;
     try {
-      const metadata = await request(api), branch = metadata.default_branch;
-      const [tree, commit, readme] = await Promise.all([
-        request(`${api}/git/trees/${encodeURIComponent(branch)}?recursive=1`),
-        request(`${api}/commits/${encodeURIComponent(branch)}`),
-        request(`https://raw.githubusercontent.com/${owner}/${repository}/${encodeURIComponent(branch)}/README.md`, false).catch(() => "README unavailable.")
-      ]);
-      const files = (tree.tree || []).filter((item) => item.type === "blob" || item.type === "tree");
-      set("[data-repo-description]", metadata.description || "Public Ohmium source code and runtime.");
-      set("[data-repo-branch]", branch);
-      set("[data-repo-revision]", String(commit.sha || tree.sha).slice(0, 7));
-      set("[data-repo-count]", `${files.filter((item) => item.type === "blob").length} files`);
-      set("[data-repo-status]", `GitHub connected · ${String(commit.sha || tree.sha).slice(0, 7)}`);
-      host.innerHTML = treeMarkup(buildTree(files));
-      const readmeHost = one("[data-repository-readme]");
-      if (readmeHost) readmeHost.innerHTML = markdown(readme);
-      host.addEventListener("click", (event) => { const button = event.target.closest("[data-repo-file]"); if (button) loadFile(button.dataset.repoFile, Number(button.dataset.repoSize), branch, metadata.pushed_at); });
-      const defaultFile = files.find((item) => item.path === "README.md") || files.find((item) => item.type === "blob");
-      if (defaultFile) await loadFile(defaultFile.path, defaultFile.size, branch, metadata.pushed_at);
+      const response = await fetch("./source-index.json?v=1", { cache: "no-store" });
+      if (!response.ok) throw new Error(`Source index returned HTTP ${response.status}`);
+      const manifest = await response.json(), files = manifest.files || [], byPath = new Map(files.map((file) => [file.path, file]));
+      set("[data-repo-description]", manifest.description);
+      set("[data-repo-branch]", "main");
+      set("[data-repo-revision]", String(manifest.revision || "unknown").slice(0, 7));
+      set("[data-repo-count]", `${files.length} files`);
+      set("[data-repo-status]", `Source mounted · ${String(manifest.revision || "unknown").slice(0, 7)}`);
+      host.innerHTML = treeMarkup(nested(files));
+      const readme = byPath.get("README.md"), readmeHost = one("[data-repository-readme]");
+      if (readmeHost) readmeHost.innerHTML = readme?.content ? markdown(readme.content) : "<p>README.md is not present in this release.</p>";
+
+      const show = (file) => {
+        host.querySelectorAll("button.selected").forEach((button) => button.classList.remove("selected"));
+        host.querySelector(`[data-source-path="${CSS.escape(file.path)}"]`)?.classList.add("selected");
+        set("[data-code-path]", file.path);
+        set("[data-code-size]", formatBytes(file.size));
+        set("[data-code-language]", file.language);
+        set("[data-code-state]", file.content === null ? "Binary asset metadata" : `${file.content.split(/\r?\n/).length} lines · release source`);
+        set("[data-code-updated]", `Revision ${String(manifest.revision || "unknown").slice(0, 7)}`);
+        const lines = one("[data-code-lines]");
+        if (lines) { lines.innerHTML = sourceLines(file); lines.scrollTop = 0; }
+      };
+      host.addEventListener("click", (event) => { const button = event.target.closest("[data-source-path]"); const file = button && byPath.get(button.dataset.sourcePath); if (file) show(file); });
+      if (readme) show(readme); else if (files[0]) show(files[0]);
     } catch (error) {
-      host.innerHTML = `<p>${escapeHtml(error.message)}. No repository data was substituted.</p>`;
-      set("[data-repo-status]", "GitHub unavailable");
+      host.innerHTML = `<p>${escapeHtml(error.message)}. No substitute source was rendered.</p>`;
+      set("[data-repo-status]", "Source index unavailable");
       set("[data-code-state]", "Source unavailable");
     }
   }

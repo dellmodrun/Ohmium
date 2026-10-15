@@ -39,7 +39,7 @@ function withinLimit(request) { const key = request.socket.remoteAddress || "unk
 
 function staticFile(response, pathname) {
   const requested = pathname === "/" ? "index.html" : pathname.slice(1);
-  const files = new Set(["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "repository-browser.js", "network-pages.js", "ohmium-core.js"]);
+  const files = new Set(["index.html", "styles.css", "app.js", "data-client.js", "home-monitor.js", "repository-browser.js", "network-pages.js", "ohmium-core.js", "source-index.json"]);
   if (!files.has(requested) && !requested.startsWith("assets/")) return false;
   const file = resolve(root, normalize(requested)), rel = relative(root, file);
   if (rel.startsWith("..") || isAbsolute(rel) || !existsSync(file)) return false;
@@ -72,7 +72,7 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && path === "/api/events") { response.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive" }); response.write(`event: snapshot\ndata: ${JSON.stringify(publicState())}\n\n`); clients.add(response); request.on("close", () => clients.delete(response)); return; }
     if (request.method === "GET" && path === "/api/tasks") return json(response, 200, { tasks: state.tasks });
     const mutationRead = path.match(/^\/api\/mutations\/([^/]+)$/);
-    if (request.method === "GET" && mutationRead) { const mutation = state.mutations.find((item) => item.id === mutationRead[1]); return mutation ? json(response, 200, { mutation }) : json(response, 404, { error: "mutation not found" }); }
+    if (request.method === "GET" && mutationRead) { const machine = machineAuth(request); if (!machine) return json(response, 401, { error: "valid machine bearer token required" }); const mutation = state.mutations.find((item) => item.id === mutationRead[1]); return mutation ? json(response, 200, { mutation }) : json(response, 404, { error: "mutation not found" }); }
     if (request.method === "POST" && path === "/api/tasks") {
       if (!adminAuth(request)) return json(response, 401, { error: "admin bearer token required" });
       const input = await body(request);

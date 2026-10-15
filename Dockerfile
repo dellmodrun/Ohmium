@@ -1,8 +1,8 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package.json server.mjs app.js runtime.js github-live.js product-pages.js index.html styles.css ./
-COPY assets ./assets
-RUN mkdir -p /app/data && chown -R node:node /app
+RUN apk add --no-cache git
+COPY . .
+RUN node tools/build-source-index.mjs && mkdir -p /app/data && chown -R node:node /app
 USER node
 ENV HOST=0.0.0.0 PORT=4210 OHMIUM_DATA_DIR=/app/data
 EXPOSE 4210
