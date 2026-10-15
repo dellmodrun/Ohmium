@@ -50,9 +50,13 @@
     set("[data-core-mode]", "OFFLINE");
     set("[data-core-uptime]", "—");
     set("[data-core-memory]", "—");
+    set("[data-core-heap]", "—");
     set("[data-core-requests]", "—");
     set("[data-core-clients]", "—");
     set("[data-core-events]", "—");
+    set("[data-network-online]", "0");
+    set("[data-network-verifying]", "0");
+    set("[data-network-generations]", "0");
     set("[data-proof-mode]", "EMPTY");
     set("[data-proof-id]", "Proof —");
     set("[data-proof-hash]", "Hash —");
@@ -68,6 +72,7 @@
     const lastEvent = events[0];
     document.body.dataset.signal = lastEvent ? "live" : "empty";
     const onlineMachines = (state.machines || []).filter((machine) => machine.status !== "offline");
+    const officialAgents = Array.isArray(state.officialAgents) ? state.officialAgents : [];
     set("[data-input-mode]", lastEvent ? "LIVE" : "EMPTY");
     set("[data-input-gateway]", "Connected");
     set("[data-input-queue]", String(telemetry.openTasks));
@@ -79,10 +84,28 @@
     set("[data-core-mode]", "CONNECTED");
     set("[data-core-uptime]", duration(telemetry.uptimeSec));
     set("[data-core-memory]", `${telemetry.rssMb} MB`);
+    set("[data-core-heap]", `${telemetry.heapMb} MB`);
     set("[data-core-requests]", String(telemetry.requests));
     set("[data-core-clients]", String(telemetry.sseClients));
     set("[data-core-events]", String(telemetry.events));
+    set("[data-network-online]", String(telemetry.onlineMachines));
+    set("[data-network-verifying]", String(telemetry.verifying));
+    set("[data-network-generations]", String(telemetry.generations));
     set(".cell-status em", `Core online · ${onlineMachines.length} active · ${clock(telemetry.at)}`);
+
+    const dispatchRows = all(".dispatch-grid [data-stage]").filter((row) => row.dataset.stage !== "core");
+    dispatchRows.forEach((row, index) => {
+      const agent = officialAgents[index];
+      if (!agent) return;
+      row.dataset.agent = agent.id;
+      row.querySelector("b").textContent = agent.slot;
+      row.querySelector("span").textContent = agent.role;
+      row.querySelector("em").textContent = agent.status;
+      row.classList.toggle("is-online", agent.status === "online" || agent.status === "busy");
+      row.title = `${agent.id}: ${agent.responsibility}`;
+    });
+    set("[data-trace-id]", `${officialAgents.length} official agents`);
+    set("[data-trace-result]", onlineMachines.length ? `${onlineMachines.length} connected` : "Ready · 0 connected");
 
     const proof = state.lineage?.at?.(-1);
     if (proof) {
@@ -102,7 +125,7 @@
 
   const index = one("[data-component-index]");
   if (index) {
-    ["SENSE", "FILTER", "ORACLE", "GUARD", "ROUTE", "MEMORY", "ARCHIVE", "VERIFY"].forEach((name, row) => {
+    ["SENSE", "FILTER", "MEASURE", "GUARD", "ROUTE", "MEMORY", "ARCHIVE", "VERIFY"].forEach((name, row) => {
       const item = document.createElement("div");
       item.className = "index-row";
       item.innerHTML = `<b>${String(row + 1).padStart(2, "0")} ${name}</b><span class="index-cells">${"<i></i>".repeat(16)}</span><em>idle</em>`;

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "label": "Ohmium Genesis Circuit",
+  "agents": [
+    { "id": "ohm-sense", "slot": "01", "role": "Sense", "component": "Sensor", "responsibility": "Read repository and task inputs while preserving source provenance.", "accepts": ["repository", "task"], "emits": ["source-observation"] },
+    { "id": "ohm-filter", "slot": "02", "role": "Filter", "component": "Resistor", "responsibility": "Reject malformed, duplicate, oversized or out-of-scope inputs.", "accepts": ["source-observation"], "emits": ["bounded-input"] },
+    { "id": "ohm-oracle", "slot": "03", "role": "Measure", "component": "Oscillator", "responsibility": "Run declared benchmarks and record reproducible baseline measurements.", "accepts": ["bounded-input"], "emits": ["baseline-measurement"] },
+    { "id": "ohm-guard", "slot": "04", "role": "Guard", "component": "Fuse", "responsibility": "Enforce authorization, resource limits and isolated execution policy.", "accepts": ["execution-request"], "emits": ["policy-decision"] },
+    { "id": "ohm-router", "slot": "05", "role": "Route", "component": "Transistor", "responsibility": "Route open work and verification requests to eligible workers.", "accepts": ["task", "policy-decision"], "emits": ["dispatch"] },
+    { "id": "ohm-memory", "slot": "06", "role": "Memory", "component": "Capacitor", "responsibility": "Retain public task, mutation and lineage state across Core restarts.", "accepts": ["state-change"], "emits": ["persisted-state"] },
+    { "id": "ohm-archive", "slot": "07", "role": "Archive", "component": "Register", "responsibility": "Index event records and accepted artifact digests for inspection.", "accepts": ["event", "artifact-digest"], "emits": ["indexed-record"] },
+    { "id": "ohm-verify", "slot": "08", "role": "Verify", "component": "Comparator", "responsibility": "Independently replay tests and measurements before lineage acceptance.", "accepts": ["mutation", "patch-digest"], "emits": ["verification-vote"] }
+  ]
+}

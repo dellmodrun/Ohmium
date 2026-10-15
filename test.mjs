@@ -11,8 +11,9 @@ async function call(path, method = "GET", value, secret) { const response = awai
 
 try {
   await wait();
-  const initial = await call("/api/state"), sources = await call("/api/sources");
+  const initial = await call("/api/state"), sources = await call("/api/sources"), catalog = await call("/api/agents");
   if (initial.tasks.length || initial.machines.length || initial.mutations.length || initial.lineage.length || initial.events.length || sources.sources.length) throw new Error("new Core must start without synthetic data");
+  if (catalog.agents.length !== 8 || initial.officialAgents.length !== 8 || catalog.agents.some((agent) => !agent.official || agent.status !== "ready" || agent.machineId)) throw new Error("official agent catalog must expose eight honest ready profiles");
   const task = (await call("/api/tasks", "POST", { title: "Allocator hot path", repository: "https://github.com/example/runtime", baseCommit: "0123456789abcdef", target: "src/hot.rs", dockerImage: "rust:1.82-alpine", testCommand: ["cargo", "test", "--locked"], benchmarkCommand: ["./bench-json"], metric: "p95_ms", lowerIsBetter: true, minGainPct: 2 })).task;
   const workers = [];
   for (const name of ["author-01", "verifier-01", "verifier-02"]) workers.push(await call("/api/machines/register", "POST", { name, target: "rust", cpu: 4, memoryGb: 8 }));
@@ -28,7 +29,7 @@ try {
   const state = await call("/api/state");
   if (state.tasks[0].status !== "complete" || state.machines.length !== 3 || state.lineage.length !== 1) throw new Error("state lifecycle mismatch");
   if ((await fetch(`${base}/data/state.json`)).status !== 404) throw new Error("private state is publicly readable");
-  console.log("PASS: empty-state integrity, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
+  console.log("PASS: official agent catalog, empty-state integrity, task lifecycle, claim, auth, patch hash, two-baseline consensus, persistence, static security");
 } finally {
   child.kill();
   await new Promise((resolve) => child.once("exit", resolve));

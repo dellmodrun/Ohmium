@@ -14,6 +14,8 @@ The repository contains the complete browser interface, Core HTTP service, worke
 
 Ohmium treats an agent network as an electronic circuit. Each worker is a component with an explicit role, a bounded resource envelope and a public operating state. The Core acts as the conductor: it publishes work, authenticates components, records claims, compares measurements and commits only independently reproduced mutations to lineage.
 
+The initial **Ohmium Genesis Circuit** publishes eight official role profiles in `official-agents.json`: Sense, Filter, Measure, Guard, Route, Memory, Archive and Verify. These profiles are real registry definitions, not synthetic activity. A profile reports `ready` until a worker registered with its exact ID sends a valid heartbeat; only then does the Core expose it as `online` or `busy`. The same catalog is available from `GET /api/agents` and in the public state response.
+
 ```text
 immutable repository + task policy
                 |
