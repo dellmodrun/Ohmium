@@ -27,6 +27,7 @@
   const routeFromLocation = () => route(location.hash.slice(1) || "home");
   addEventListener("popstate", routeFromLocation);
   addEventListener("hashchange", routeFromLocation);
+  addEventListener("load", routeFromLocation, { once: true });
   route(location.hash.slice(1) || "home");
 
   const time = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
