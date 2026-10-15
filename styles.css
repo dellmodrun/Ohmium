@@ -308,3 +308,14 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .social-cluster:after{content:"";position:absolute;top:50%;left:50%;width:1px;height:18px;background:#223027;transform:translate(-.5px,-50%);pointer-events:none}
 .header-actions .social-icon{width:auto!important;border:0!important}
 @media(max-width:1260px) and (min-width:1051px){.social-cluster{width:84px!important}}
+
+/* Header type scale: readable product navigation, not micro-labels. */
+.topbar nav a{font-size:12px!important;font-weight:500!important;letter-spacing:0!important}
+.header-actions>button>span{font-size:11px!important;font-weight:500!important;letter-spacing:0!important}
+.header-actions .buy-cell{font-size:11px!important;font-weight:600!important;letter-spacing:0!important}
+@media(max-width:1260px) and (min-width:1051px){.topbar nav a{font-size:11px!important}.header-actions>button>span,.header-actions .buy-cell{font-size:10px!important}}
+
+/* No lower rail beneath navigation — active state is text-only. */
+.topbar{border-bottom:0!important}
+.topbar:after{content:none!important;display:none!important;background:none!important}
+.topbar nav,.topbar nav a,.topbar nav a:hover,.topbar nav a:active,.topbar nav a:focus,.topbar nav a.active{border-bottom:0!important}
