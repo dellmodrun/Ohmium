@@ -127,12 +127,85 @@ function stack(spec) {
   return k.figureSvg({ width: WIDTH, height: HEIGHT, label: spec.label, className: "iso ohmium-agent-model", body: out });
 }
 
+function deploymentRack() {
+  const width = 620;
+  const height = 500;
+  const plate = { x: -86, y: -59, w: 172, d: 118, r: 8 };
+  const P = k.fitProjection([...k.boxCorners(plate, -10, 5), [-76, -49, 128], [76, 49, 128]], width, height, { pad: 34, azimuth: 41, elevation: 29 });
+  const out = [`<path class="iso-halo" d="${k.haloOf(plate, -10, 13, P)}"/>`];
+
+  for (const [x, y] of byDepth(k.corners(plate, 15), P)) {
+    out.push(S(k.cylinder(x, y, 6, -10, 2.4, P, 28), { tone: "lo" }));
+    out.push(S(k.cylinder(x, y, 4.6, -7.6, 4.2, P, 28), { tone: "mid" }));
+    out.push(L(k.sideArc(x, y, 4.6, -5.6, P, 20), { tone: "faint" }));
+  }
+  out.push(S(k.slabOf(plate, -3.4, 8.4, P, 8, 1.4), { tone: "mid" }));
+  out.push(L(k.planOutline(k.insetPlan(plate, 5), 5.05, P), { tone: "lo" }));
+  const baseScrews = k.corners(plate, 11);
+  out.push(L(baseScrews.map(([x, y]) => k.ring(x, y, 2.1, 5.2, P, 18)).join(""), { tone: "lo" }));
+  out.push(D(baseScrews.map(([x, y]) => k.iso([x, y, 5.3], P)), { size: .52, tone: "hi" }));
+
+  const plinth = { x: -64, y: -41, w: 128, d: 82, r: 4 };
+  out.push(S(k.slabOf(plinth, 5, 8, P, 5, .8), { tone: "lo" }));
+  out.push(L(k.sideSeam(plinth, 9, P, 5), { tone: "faint" }));
+
+  const posts = [[-61, -39], [57, -39], [-61, 35], [57, 35]];
+  for (const [x, y] of byDepth(posts, P)) {
+    out.push(S(k.slabOf({ x, y, w: 4, d: 4, r: .7 }, 13, 103, P, 3, .45), { tone: "hi" }));
+    for (const z of [25, 45, 65, 85, 105]) out.push(D([k.iso([x + 2, y - .15, z], P)], { size: .5, tone: "mid" }));
+  }
+
+  const back = { x: -57, y: 34, w: 114, d: 3.2, r: .8 };
+  out.push(S(k.slabOf(back, 16, 96, P, 3, .35), { tone: "lo" }));
+  const rails = [-35, 31];
+  for (const y of rails) out.push(S(k.slabOf({ x: -57, y, w: 114, d: 3, r: .5 }, 18, 94, P, 3, .3), { tone: "mid" }));
+
+  const trayZ = [20, 34, 48, 62, 76, 90];
+  trayZ.forEach((z, row) => {
+    const tray = { x: -53, y: -34 - (row === 2 ? 5 : 0), w: 106, d: row === 2 ? 70 : 65, r: 2.2 };
+    const trayParts = [];
+    trayParts.push(S(k.slabOf(tray, z, 8.4, P, 4, .65), { tone: row === 2 ? "hi" : "mid" }));
+    trayParts.push(L(k.sideSeam(tray, z + 4.2, P, 4), { tone: "faint" }));
+    const faceY = tray.y - .2;
+    trayParts.push(S(k.slabOf({ x: -49, y: faceY - 2.3, w: 98, d: 2.4, r: .5 }, z + 1, 6.1, P, 3, .25), { tone: row === 2 ? "hi" : "lo" }));
+    for (let port = 0; port < 8; port += 1) trayParts.push(D([k.iso([-39 + port * 9.2, faceY - 2.5, z + 4.1], P)], { size: port < 2 && row === 2 ? .72 : .46, tone: port < 2 && row === 2 ? "lit" : "mid" }));
+    for (const x of [-45, 45]) trayParts.push(L(k.ring(x, faceY - 2.5, 1.45, z + 4.1, P, 14), { tone: "hi" }));
+    out.push(`<g class="${row === 2 ? "deploy-service-tray" : "deploy-rack-tray"}" data-rack-row="${row + 1}">${trayParts.join("")}</g>`);
+  });
+
+  for (const sideX of [-68, 66]) {
+    out.push(S(k.slabOf({ x: sideX, y: -34, w: 2, d: 68, r: .4 }, 19, 91, P, 2, .25), { tone: "mid" }));
+    for (const z of [31, 55, 79, 103]) out.push(S(k.slabOf({ x: sideX - 1, y: -31, w: 4, d: 61, r: .4 }, z, 2.3, P, 2, .2), { tone: "lo" }));
+  }
+
+  const roof = { x: -67, y: -43, w: 134, d: 86, r: 4.5 };
+  out.push(S(k.slabOf(roof, 116, 7, P, 5, .8), { tone: "hi" }));
+  out.push(L(k.planOutline(k.insetPlan(roof, 4.5), 123.05, P), { tone: "lo" }));
+  for (const x of [-38, 0, 38]) {
+    out.push(S(k.cylinder(x, 1, 11, 123, 2.8, P, 40, .4), { tone: "lo" }));
+    out.push(L(k.ring(x, 1, 7.8, 125.9, P, 30), { tone: "mid" }));
+    const spokes = [0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => k.lineOnTop([x + Math.cos(angle) * 2, 1 + Math.sin(angle) * 2], [x + Math.cos(angle) * 7, 1 + Math.sin(angle) * 7], 126, P));
+    out.push(L(spokes.join(""), { tone: "lo" }));
+  }
+
+  const power = { x: 67, y: 22, w: 10, d: 18, r: 2 };
+  out.push(S(k.slabOf(power, 25, 41, P, 4, .6), { tone: "mid" }));
+  [32, 44, 56].forEach((z) => out.push(L(k.sideSeam(power, z, P, 4), { tone: "faint" })));
+  out.push(`<g data-part="deploy-status-lamp">${S(k.cylinder(71, 27, 4.5, 67, 2.6, P, 28), { tone: "mid" })}${S(k.cylinder(71, 27, 2.3, 69.6, 3.2, P, 28), { tone: "hi", lit: true })}</g>`);
+
+  const label = { x: -76, y: 45, w: 47, d: 8, r: 1.2 };
+  out.push(S(k.slabOf(label, 5.1, .9, P, 3), { tone: "lo", flat: true }));
+  out.push(L(k.lineOnTop([-71, 49], [-38, 49], 6.1, P), { tone: "mid", free: "both" }));
+  return k.figureSvg({ width, height, label: "Ohmium deployment rack", className: "iso ohmium-deploy-rack", body: out });
+}
+
 const models = Object.fromEntries(ids.map((id) => {
   const spec = specs[id];
   return [id, spec.type === "logic" ? logic(spec) : spec.type === "rack" ? rack(spec) : stack(spec)];
 }));
+const deployRack = deploymentRack();
 
-const theme = `${k.ISO_CSS}\n.ohmium-agent-model{--anatomy-paper:#010301;--anatomy-face:#071008;--anatomy-top:#08120a;--anatomy-shade-0:#020503;--anatomy-shade-1:#030804;--anatomy-shade-2:#050b06;--anatomy-shade-3:#071008;--anatomy-lit-top:#112417;--anatomy-lit-shade:#0b1a0f;--anatomy-hi:#87a88d;--anatomy-mid:#496651;--anatomy-lo:#263c2c;--anatomy-faint:#17251b;--anatomy-lit:#7fe03a;--anatomy-dot:#7fe03a;--anatomy-halo:#000;--anatomy-halo-opacity:.95}.live-agent-card.is-online [data-part=status-lamp] .iso-top{fill:#7fe03a}.live-agent-card.is-online [data-part=status-lamp]{filter:drop-shadow(0 0 5px rgba(127,224,58,.45))}`;
-const output = `(() => { if (!document.getElementById("ohmium-anatomy-css")) { const style = document.createElement("style"); style.id = "ohmium-anatomy-css"; style.textContent = ${JSON.stringify(theme)}; document.head.append(style); } window.OhmiumAgentModels = Object.freeze(${JSON.stringify(models)}); })();\n`;
+const theme = `${k.ISO_CSS}\n.ohmium-agent-model,.ohmium-deploy-rack{--anatomy-paper:#010301;--anatomy-face:#071008;--anatomy-top:#08120a;--anatomy-shade-0:#020503;--anatomy-shade-1:#030804;--anatomy-shade-2:#050b06;--anatomy-shade-3:#071008;--anatomy-lit-top:#112417;--anatomy-lit-shade:#0b1a0f;--anatomy-hi:#87a88d;--anatomy-mid:#496651;--anatomy-lo:#263c2c;--anatomy-faint:#17251b;--anatomy-lit:#7fe03a;--anatomy-dot:#7fe03a;--anatomy-halo:#000;--anatomy-halo-opacity:.95}.live-agent-card.is-online [data-part=status-lamp] .iso-top{fill:#7fe03a}.live-agent-card.is-online [data-part=status-lamp]{filter:drop-shadow(0 0 5px rgba(127,224,58,.45))}`;
+const output = `(() => { if (!document.getElementById("ohmium-anatomy-css")) { const style = document.createElement("style"); style.id = "ohmium-anatomy-css"; style.textContent = ${JSON.stringify(theme)}; document.head.append(style); } window.OhmiumAgentModels = Object.freeze(${JSON.stringify(models)}); window.OhmiumDeployRack = ${JSON.stringify(deployRack)}; document.querySelectorAll("[data-deploy-rack]").forEach((node) => { node.innerHTML = window.OhmiumDeployRack; }); })();\n`;
 writeFileSync(resolve("agent-models.js"), output);
 console.log(`Agent models: ${ids.length}, ${Buffer.byteLength(output)} bytes`);

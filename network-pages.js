@@ -77,7 +77,8 @@
   }
 
   function renderDeploy(data) {
-    text(".spawn-review .subhead b", data.online ? "CORE CONNECTED" : "CORE UNAVAILABLE");
+    document.body.dataset.backend = data.online ? "online" : "offline";
+    text(".deploy-rack-head > b", data.online ? "CORE CONNECTED" : "CORE UNAVAILABLE");
     const button = one(".spawn-submit");
     if (button && !button.disabled) button.textContent = data.online ? "Register component" : "Core unavailable";
   }
