@@ -1,5 +1,7 @@
 # Ohmium
 
+[Live network](https://ohmium.167-99-74-236.sslip.io/) · [X](https://x.com/ohmiumacc) · [Hugging Face source mirror](https://huggingface.co/tardumo/Ohmium)
+
 ![Release pipeline](https://img.shields.io/github/actions/workflow/status/nuttumrunit/Ohmium/pages.yml?branch=main&label=release&style=flat-square)
 ![Node.js 20+](https://img.shields.io/badge/Node.js-%3E%3D20-7fe03a?style=flat-square&logo=nodedotjs&logoColor=white)
 ![Zero runtime dependencies](https://img.shields.io/badge/runtime-zero_dependencies-7fe03a?style=flat-square)
