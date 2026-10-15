@@ -405,3 +405,15 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .cell-action-zone .cell-manual-link{color:#75837a!important;font-size:9px!important}
 .cell-action-zone .cell-manual-link:hover{color:#dfe7e2!important}
 @media(max-width:680px){.cell-system-line{max-width:none}.cell-wordmark{height:auto!important;font-size:clamp(64px,20vw,92px)!important}.cell-ca{grid-template-columns:105px minmax(0,1fr) 54px!important}.cell-action-zone .cell-actions a{min-width:0!important;flex:1}}
+
+/* Live viewport — one status bar, one clean stream surface. */
+.cell-screen{grid-template-rows:42px minmax(0,1fr)!important;background:#000!important}
+.cell-screen>header{height:42px!important;padding:0 18px!important;color:#dce4df!important;border-bottom:1px solid #26372c!important;font-size:10px!important}
+.cell-screen>header span{display:flex;align-items:center;gap:9px;font-weight:500}
+.cell-screen>header i{width:6px!important;height:6px!important;margin:0!important;border-radius:0!important;background:var(--acid)!important;box-shadow:none!important}
+.cell-screen>header em{color:#65736b!important;font-size:8px!important;letter-spacing:0!important;text-transform:none}
+.screen-stage{background:#000!important}
+.screen-grid,.screen-cross,.cell-core,.screen-corners,.cell-screen>footer{display:none!important}
+.awaiting{top:50%!important;width:auto!important;min-width:260px;transform:translate(-50%,-50%)!important}
+.awaiting strong{color:#aeb9b2!important;font-size:11px!important;font-weight:500!important}
+.awaiting span{margin-top:8px!important;color:#55635b!important;font-size:8px!important}
