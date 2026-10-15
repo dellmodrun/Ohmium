@@ -365,3 +365,15 @@ html,body,.topbar,.app-view,.workstation,.cell-live,.cell-intro,.cell-screen,.ce
 .modal-close{top:13px!important;right:16px!important;width:22px;height:22px;padding:0!important;color:#77847c!important;font:18px/20px var(--mono)!important;border:0!important;background:#000!important}
 .modal-close:hover{color:#fff!important}
 @media(max-width:680px){.wallet-modal{padding:12px!important}.wallet-body{padding:25px 18px 20px}.wallet-list{grid-template-columns:1fr!important}.wallet-choice{height:72px!important;grid-template-columns:50px 1fr auto!important;grid-template-rows:1fr!important;justify-items:start!important;text-align:left!important}.wallet-choice>i.wallet-brand,.wallet-choice>i.wallet-brand img{width:36px!important;height:36px!important}.wallet-security{flex-direction:column}.wallet-security span{border-right:0!important;border-bottom:1px solid #223027!important}.wallet-security span:last-child{border-bottom:0!important}.wallet-console>footer code{display:none!important}}
+
+/* Home introduction — remove terminal chrome and give the core story room. */
+.cell-intro-body{height:100%;padding:24px 36px 22px!important}
+.cell-wordmark{height:96px!important;margin:0!important;font-size:94px!important;line-height:1!important}
+.cell-intro h1{max-width:700px!important;margin:12px 0 10px!important;font-size:15px!important;line-height:1.48!important}
+.cell-intro-body>p{max-width:690px!important;margin:0 0 16px!important;font-size:9px!important;line-height:1.65!important}
+.cell-ca{height:40px!important;margin:0!important}
+.cell-proof-banner{min-height:82px!important;margin-top:14px!important;padding:10px!important}
+.cell-action-zone{min-height:67px!important;margin-top:14px!important}
+.cell-action-zone .cell-actions a{min-height:40px!important;padding:10px 18px!important}
+.cell-action-zone .cell-manual-link{margin-top:10px!important}
+@media(max-width:1050px){.cell-intro-body{height:auto;padding:28px 24px!important}.cell-wordmark{height:auto!important;font-size:clamp(66px,13vw,100px)!important}}
