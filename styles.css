@@ -160,3 +160,10 @@ body[data-route="live"]{overflow-y:auto}.cell-action-zone{position:relative;z-in
 
 /* Desktop mutation wall: preserve the eight-card viewport, place four more below the fold. */
 @media(min-width:1051px){.machine-workstation{height:auto;min-height:calc(100dvh - 54px);overflow:visible}.machine-workstation.is-active{grid-template-rows:50px auto 24px}.machine-wall.repo-live-wall.twelve{min-height:0;margin:0 16px 10px;overflow:visible;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(300px,calc(50dvh - 69px)))}.machine-wall.repo-live-wall.twelve .repo-live-tile{min-height:0;overflow:hidden;grid-template-rows:25px minmax(0,1fr) 23px}.machine-wall.repo-live-wall.twelve .repo-live-tile>header,.machine-wall.repo-live-wall.twelve .repo-live-tile>footer{padding:0 8px;font-size:6.5px}.machine-wall.repo-live-wall.twelve.github-synced-wall .repo-live-viewport{min-height:0;grid-template-rows:20px 25px 19px 22px minmax(0,1fr)}.machine-wall.repo-live-wall.twelve .repo-mini-browser{height:20px;padding:5px 8px;font-size:5.5px}.machine-wall.repo-live-wall.twelve .repo-tile-code{padding:6px 6px 18px 29px;font-size:6.6px;line-height:1.4}}
+
+/* Ohmium identity */
+.brand-logo{width:42px;height:42px;overflow:visible}
+.brand-logo img{position:absolute;top:50%;left:50%;width:46px;height:46px;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 0 9px rgba(122,245,48,.16))}
+.brand{gap:10px}.brand>span:last-child{text-transform:lowercase;letter-spacing:.08em}
+.header-actions .ca{min-width:78px;justify-content:center;color:#8f9b94}
+.header-actions [aria-disabled="true"]{opacity:.48;pointer-events:none}
