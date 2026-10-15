@@ -53,6 +53,7 @@
         const route = ["sensor", "filter", "oracle", "guard", "router", "memory", "archive", "verify", "core"];
         for (let index = 0; index < route.length && run === inspection; index++) {
           activate(route[index]);
+          window.dispatchEvent(new CustomEvent("ohmium:inspection-step", { detail: { component: route[index], index, total: route.length } }));
           inspect.textContent = index < 8 ? `Inspecting ${index + 1} / 8` : "Route verified";
           await new Promise((resolve) => setTimeout(resolve, matchMedia("(prefers-reduced-motion: reduce)").matches ? 80 : 520));
         }
@@ -64,6 +65,7 @@
         inspect.textContent = "Inspect execution path";
         inspect.disabled = false;
         inspection = 0;
+        window.dispatchEvent(new CustomEvent("ohmium:inspection-complete"));
       });
       window.addEventListener("ohmium:signal", (event) => {
         const key = event.detail?.component;
