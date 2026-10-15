@@ -19,7 +19,9 @@
     history.pushState(null, "", `#${link.dataset.route}`);
     route(link.dataset.route);
   }));
-  addEventListener("popstate", () => route(location.hash.slice(1) || "home"));
+  const routeFromLocation = () => route(location.hash.slice(1) || "home");
+  addEventListener("popstate", routeFromLocation);
+  addEventListener("hashchange", routeFromLocation);
   route(location.hash.slice(1) || "home");
 
   const time = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
