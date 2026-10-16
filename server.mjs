@@ -16,7 +16,7 @@ const officialCatalog = JSON.parse(readFileSync(resolve(root, "official-agents.j
 const economicPolicy = Object.freeze({
   schema: "ohmium.economics.v1",
   network: "solana",
-  symbol: "OHMIUM",
+  symbol: "OHM",
   mint: null,
   treasuryAddress: null,
   agentActivation: { burnTokens: 10000, permanent: true, enabled: false, proofRequired: true },
