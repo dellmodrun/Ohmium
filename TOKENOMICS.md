@@ -4,7 +4,7 @@
 
 Each owner-created Agent requires a permanent burn of **10,000 $OHM**. The burn is an activation requirement, not a payment to the project treasury. One successful burn activates one Agent identity owned by the signing wallet.
 
-The amount is defined, but activation remains disabled until the token mint and burn-verification program are published. The Core must not claim that a burn occurred without an inspectable Solana transaction containing the expected mint, amount and signing wallet.
+The verified `$OHM` mint is `5SQvS1xguXn3KjLrFqwbH4SgVhcCnsxbZqx3XC23pump`. Activation remains disabled until the burn-verification program is published. The Core must not claim that a burn occurred without an inspectable Solana transaction containing the expected mint, amount and signing wallet.
 
 ## Pump.fun Creator Rewards
 
@@ -36,7 +36,6 @@ Registration or ownership alone creates no reward entitlement. Failed, duplicate
 
 ## Values that remain TBA
 
-- `$OHM` mint address;
 - treasury address;
 - burn-verification program address;
 - activation start slot and time;
