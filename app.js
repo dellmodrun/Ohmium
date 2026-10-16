@@ -248,9 +248,9 @@
   [cpu, memory, name, target].filter(Boolean).forEach((control) => control.addEventListener("input", updatePreview));
   updatePreview();
   const deployDescription = one(".spawn-intro p");
-  if (deployDescription) deployDescription.textContent = "Owner activation permanently burns 10,000 $OHM per Agent. The amount is defined; the on-chain burn step remains disabled until the verified mint and burn program are published.";
+  if (deployDescription) deployDescription.textContent = "Owner activation permanently burns 10,000 $OIUM per Agent. The amount is defined; the on-chain burn step remains disabled until the verified mint and burn program are published.";
   const activationValue = one(".deploy-rack-readout dl div:last-child dd");
-  if (activationValue) activationValue.textContent = "10,000 $OHM";
+  if (activationValue) activationValue.textContent = "10,000 $OIUM";
 
   const economicTabs = all(".economic-ledger > .subhead button");
   economicTabs.forEach((button) => button.addEventListener("click", () => {
