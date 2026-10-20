@@ -81,3 +81,18 @@ jobs:
             sleep 5
           done
           exit 1
+
+      - name: Production diagnostics
+        if: always()
+        env:
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          ssh -i ~/.ssh/celino root@"$SERVER_HOST" 'set -u
+            echo "--- CELINO CONTAINER ---"
+            docker inspect --format "{{.State.Status}}|{{if .State.Health}}{{.State.Health.Status}}{{end}}" celino-core || true
+            docker logs --tail 60 celino-core || true
+            echo "--- INTERNAL HEALTH ---"
+            docker exec cennomo-caddy-1 wget -qO- http://celino-core:4320/api/health || true
+            echo
+            echo "--- CADDY TLS LOG ---"
+            docker logs --since 15m cennomo-caddy-1 2>&1 | grep -E "celino|certificate|tls|acme|error" | tail -120 || true'
