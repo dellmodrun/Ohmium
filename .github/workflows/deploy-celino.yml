@@ -1,0 +1,83 @@
+name: Deploy Celino Core
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [deploy-celino]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: celino-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Celino release
+        uses: actions/checkout@v4
+        with:
+          repository: dellmodrun/Celino
+          ref: master
+          path: celino
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify release
+        working-directory: celino
+        run: |
+          npm run check
+          npm test
+
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY_B64: ${{ secrets.OHMIUM_SSH_PRIVATE_KEY_B64 }}
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/celino
+          chmod 600 ~/.ssh/celino
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Capacity guard
+        env:
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          ssh -i ~/.ssh/celino root@"$SERVER_HOST" 'set -eu
+            available_mb=$(awk "/MemAvailable/ {print int(\$2/1024)}" /proc/meminfo)
+            total_mb=$(awk "/MemTotal/ {print int(\$2/1024)}" /proc/meminfo)
+            disk_mb=$(df -Pm /opt | awk "NR==2 {print \$4}")
+            echo "SERVER_TOTAL_MEMORY_MB=$total_mb"
+            echo "SERVER_AVAILABLE_MEMORY_MB=$available_mb"
+            echo "SERVER_AVAILABLE_DISK_MB=$disk_mb"
+            docker stats --no-stream --format "{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}" || true
+            test "$available_mb" -ge 512 || { echo "Refusing deploy: less than 512 MB memory available" >&2; exit 1; }
+            test "$disk_mb" -ge 1024 || { echo "Refusing deploy: less than 1 GB disk available" >&2; exit 1; }'
+
+      - name: Upload and activate Celino Core
+        working-directory: celino
+        env:
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          printf '%s\n' "$GITHUB_SHA" > .release-commit
+          tar --exclude=.git --exclude=data --exclude=.env.production -czf /tmp/celino-release.tgz .
+          scp -i ~/.ssh/celino /tmp/celino-release.tgz root@"$SERVER_HOST":/tmp/celino-release.tgz
+          ssh -i ~/.ssh/celino root@"$SERVER_HOST" 'set -eu
+            install -d /opt/celino
+            tar -xzf /tmp/celino-release.tgz -C /opt/celino
+            rm -f /tmp/celino-release.tgz
+            cd /opt/celino
+            sh deploy/bootstrap.sh
+            sh deploy/install-caddy-route.sh'
+
+      - name: Verify production
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error https://celino.167-99-74-236.sslip.io/api/health; then exit 0; fi
+            sleep 5
+          done
+          exit 1
