@@ -20,8 +20,8 @@ jobs:
           SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
         run: |
           ssh -i ~/.ssh/server root@"$SERVER_HOST" 'set -u
-            grep -n -A12 -B2 "ohmium.167-99-74-236.sslip.io" /opt/cennomo/deploy/Caddyfile || true
-            echo "--- CELINO MARKERS ---"
-            grep -n -A8 -B2 "CELINO" /opt/cennomo/deploy/Caddyfile || true
+            cat /opt/cennomo/deploy/Caddyfile
             echo "--- ADAPTED ROUTES ---"
-            docker exec cennomo-caddy-1 caddy adapt --config /etc/caddy/Caddyfile --pretty | grep -n -A12 -B3 "celino-api" || true'
+            docker exec cennomo-caddy-1 caddy adapt --config /etc/caddy/Caddyfile --pretty 2>&1 | sed -n "1,360p" || true
+            echo "--- LOCAL EDGE REQUEST ---"
+            curl -sk --resolve ohmium.167-99-74-236.sslip.io:443:127.0.0.1 -D - https://ohmium.167-99-74-236.sslip.io/celino-api/api/health || true'
