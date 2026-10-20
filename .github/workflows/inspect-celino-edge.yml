@@ -21,6 +21,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/server root@"$SERVER_HOST" 'set -u
             cat /opt/cennomo/deploy/Caddyfile
+            echo "--- CADDY STATE ---"
+            docker inspect --format "status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}} restarts={{.RestartCount}} memory={{.HostConfig.Memory}} image={{.Config.Image}}" cennomo-caddy-1 || true
+            echo "--- CADDY LOG ---"
+            docker logs --tail 160 cennomo-caddy-1 2>&1 || true
             echo "--- ADAPTED ROUTES ---"
             docker exec cennomo-caddy-1 caddy adapt --config /etc/caddy/Caddyfile --pretty 2>&1 | sed -n "1,360p" || true
             echo "--- LOCAL EDGE REQUEST ---"
