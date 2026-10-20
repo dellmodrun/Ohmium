@@ -1,0 +1,27 @@
+name: Inspect Celino edge
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY_B64: ${{ secrets.OHMIUM_SSH_PRIVATE_KEY_B64 }}
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s' "$SSH_PRIVATE_KEY_B64" | base64 --decode > ~/.ssh/server
+          chmod 600 ~/.ssh/server
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
+      - name: Inspect routes
+        env:
+          SERVER_HOST: ${{ vars.OHMIUM_SERVER_HOST }}
+        run: |
+          ssh -i ~/.ssh/server root@"$SERVER_HOST" 'set -u
+            grep -n -A12 -B2 "ohmium.167-99-74-236.sslip.io" /opt/cennomo/deploy/Caddyfile || true
+            echo "--- CELINO MARKERS ---"
+            grep -n -A8 -B2 "CELINO" /opt/cennomo/deploy/Caddyfile || true
+            echo "--- ADAPTED ROUTES ---"
+            docker exec cennomo-caddy-1 caddy adapt --config /etc/caddy/Caddyfile --pretty | grep -n -A12 -B3 "celino-api" || true'
